@@ -1,7 +1,7 @@
 const translations = {
   'fr': {
-    'pageTitle': "DARK&MAGIC",
-    'brandName': "DARK&MAGIC",
+    'pageTitle': "FOXBET",
+    'brandName': "FOXBET",
     'sidebarTitle': 'Menu',
     'modeDark': "Mode Sombre",
     'modeLight': "Mode Clair",
@@ -12,8 +12,8 @@ const translations = {
     'categoryOther': "Autres Bets"
   },
   'en': {
-    'pageTitle': "DARK&MAGIC",
-    'brandName': "DARK&MAGIC",
+    'pageTitle': "FOXBET",
+    'brandName': "FOXBET",
     'sidebarTitle': "Menu",
     'modeDark': "Dark Mode",
     'modeLight': "Light Mode",
@@ -24,8 +24,8 @@ const translations = {
     'categoryOther': "Other Bets"
   },
   'ru': {
-    'pageTitle': "DARK&MAGIC",
-    'brandName': 'DARK&MAGIC',
+    'pageTitle': "FOXBET",
+    'brandName': 'FOXBET',
     'sidebarTitle': 'Меню',
     'modeDark': "Тёмный режим",
     'modeLight': "Светлый режим",
@@ -36,8 +36,8 @@ const translations = {
     'categoryOther': "Другие ставки"
   },
   'ar': {
-    'pageTitle': "DARK&MAGIC",
-    'brandName': "DARK&MAGIC",
+    'pageTitle': "FOXBET",
+    'brandName': "FOXBET",
     'sidebarTitle': "القائمة",
     'modeDark': "الوضع الداكن",
     'modeLight': "الوضع الفاتح",
@@ -168,7 +168,7 @@ function checkLanguageAndRedirect() {
       if (_0x200884) {
         window.location.href = "https://t.me/" + _0x200884;
       } else {
-        window.location.href = 'https://t.me/Darkmagicx';
+        window.location.href = 'https://t.me/';
       }
       setTimeout(() => {
         window.close();
