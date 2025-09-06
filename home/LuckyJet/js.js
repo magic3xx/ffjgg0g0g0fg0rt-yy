@@ -187,21 +187,21 @@ class LuckyJetPredictor {
         const random = Math.random();
         let coefficient;
 
-        if (random < 0.45) {
+        if (random < 0.35) {
             // Low multipliers (1.00x - 2.50x) - 45%
             coefficient = 1.00 + Math.random() * 1.50;
         } else if (random < 0.75) {
             // Medium multipliers (2.50x - 5.00x) - 30%
-            coefficient = 2.50 + Math.random() * 2.50;
+            coefficient = 2.00 + Math.random() * 2.50;
         } else if (random < 0.90) {
             // High multipliers (5.00x - 15.00x) - 15%
-            coefficient = 5.00 + Math.random() * 10.00;
+            coefficient = 3.00 + Math.random() * 7.00;
         } else if (random < 0.98) {
             // Very high multipliers (15.00x - 50.00x) - 8%
-            coefficient = 15.00 + Math.random() * 35.00;
+            coefficient = 9.00 + Math.random() * 15.00;
         } else {
             // Mega multipliers (50.00x - 200.00x) - 2%
-            coefficient = 50.00 + Math.random() * 150.00;
+            coefficient = 20.00 + Math.random() * 40.00;
         }
 
         return coefficient.toFixed(2);
