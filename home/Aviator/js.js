@@ -197,10 +197,10 @@
                 
                 if (base < 0.6) {
                     coefficient = 1 + Math.random() * 2; // 1.0 - 3.0 (60% de chance)
-                } else if (base < 0.85) {
-                    coefficient = 3 + Math.random() * 5; // 3.0 - 8.0 (25% de chance)
+                } else if (base < 0.65) {
+                    coefficient = 2 + Math.random() * 4; // 3.0 - 8.0 (25% de chance)
                 } else {
-                    coefficient = 8 + Math.random() * 42; // 8.0 - 50.0 (15% de chance)
+                    coefficient = 5 + Math.random() * 12; // 8.0 - 50.0 (15% de chance)
                 }
                 
                 return coefficient.toFixed(2);
