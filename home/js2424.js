@@ -172,10 +172,10 @@ function parseProfileFromUrl() {
   
   if (i && us && lk) {
     const telegramUrl = "https://t.me/" + lk;
-    profileBtn.setAttribute("href", telegramUrl);
-    profileName.textContent = us;
-    profileId.style.display = 'none';
-    profileInfo.style.display = 'block';
+    if (profileBtn) profileBtn.setAttribute("href", telegramUrl);
+    if (profileName) profileName.textContent = us;
+    if (profileId) profileId.style.display = 'none';
+    if (profileInfo) profileInfo.style.display = 'block';
   }
 }
 
@@ -296,7 +296,136 @@ function showExpiredScreen(title, message, lang) {
   console.log('💬 Message:', message);
   
   // COMPLETELY REPLACE PAGE CONTENT - NO ACCESS TO GAMES
-  document.body.innerHTML = '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%); color: white; text-align: center; padding: 20px; font-family: Arial, sans-serif; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999999; overflow: hidden;"><div style="background: rgba(255,255,255,0.15); padding: 50px; border-radius: 25px; backdrop-filter: blur(15px); box-shadow: 0 25px 50px rgba(0,0,0,0.4); max-width: 600px; width: 100%; border: 1px solid rgba(255,255,255,0.2); animation: slideIn 0.5s ease-out;"><div style="font-size: 100px; margin-bottom: 25px; animation: lockPulse 2s infinite; text-shadow: 0 0 20px rgba(255,255,255,0.5);">🔒</div><h1 style="margin: 0 0 25px 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">' + title + '</h1><p style="margin: 0 0 30px 0; font-size: 18px; line-height: 1.6; opacity: 0.95; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">' + message + '</p><div style="margin-bottom: 30px; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2);"><p style="font-size: 16px; margin-bottom: 15px; opacity: 0.9;">🚫 This prevents old chat buttons from working</p><ul style="list-style: none; padding: 0; margin: 0;"><li style="margin: 8px 0; font-size: 15px;">❌ License has expired or invalid</li><li style="margin: 8px 0; font-size: 15px;">❌ Cannot bypass validation</li><li style="margin: 8px 0; font-size: 15px;">✅ Use bot for latest access</li></ul></div><a href="https://t.me/admin" style="display: inline-block; background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; padding: 15px 35px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 18px; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(255,107,107,0.4); text-transform: uppercase; letter-spacing: 1px;" onmouseover="this.style.transform=\\'translateY(-3px) scale(1.05)\\'; this.style.boxShadow=\\'0 15px 30px rgba(255,107,107,0.6)\\';" onmouseout="this.style.transform=\\'translateY(0) scale(1)\\'; this.style.boxShadow=\\'0 10px 20px rgba(255,107,107,0.4)\\';">📞 ' + t.contactAdmin + '</a><div style="margin-top: 30px; font-size: 14px; opacity: 0.7; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">© 2024 FOXBET - Secure License System<br/>🛡️ No old button access allowed - Always validated</div></div><style>@keyframes lockPulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.8; text-shadow: 0 0 30px rgba(255,255,255,0.8); } 100% { transform: scale(1); opacity: 1; } } @keyframes slideIn { from { opacity: 0; transform: translateY(-50px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } } * { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }</style></div>';
+  document.body.innerHTML = `
+    <div style="
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999999;
+      overflow: hidden;
+    ">
+      <div style="
+        background: rgba(255,255,255,0.15);
+        padding: 50px;
+        border-radius: 25px;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        max-width: 600px;
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.2);
+        animation: slideIn 0.5s ease-out;
+      ">
+        <div style="
+          font-size: 100px; 
+          margin-bottom: 25px; 
+          animation: lockPulse 2s infinite;
+          text-shadow: 0 0 20px rgba(255,255,255,0.5);
+        ">🔒</div>
+        
+        <h1 style="
+          margin: 0 0 25px 0; 
+          font-size: 28px; 
+          font-weight: bold;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        ">${title}</h1>
+        
+        <p style="
+          margin: 0 0 30px 0; 
+          font-size: 18px; 
+          line-height: 1.6; 
+          opacity: 0.95;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        ">${message}</p>
+        
+        <div style="
+          margin-bottom: 30px;
+          background: rgba(255,255,255,0.1);
+          padding: 20px;
+          border-radius: 15px;
+          border: 1px solid rgba(255,255,255,0.2);
+        ">
+          <p style="font-size: 16px; margin-bottom: 15px; opacity: 0.9;">🚫 This prevents old chat buttons from working</p>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            <li style="margin: 8px 0; font-size: 15px;">❌ License has expired or invalid</li>
+            <li style="margin: 8px 0; font-size: 15px;">❌ Cannot bypass validation</li>
+            <li style="margin: 8px 0; font-size: 15px;">✅ Use bot for latest access</li>
+          </ul>
+        </div>
+        
+        <a href="https://t.me/admin" style="
+          display: inline-block;
+          background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+          color: white;
+          padding: 15px 35px;
+          border-radius: 30px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 18px;
+          transition: all 0.3s ease;
+          box-shadow: 0 10px 20px rgba(255,107,107,0.4);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        " onmouseover="
+          this.style.transform='translateY(-3px) scale(1.05)';
+          this.style.boxShadow='0 15px 30px rgba(255,107,107,0.6)';
+        " onmouseout="
+          this.style.transform='translateY(0) scale(1)';
+          this.style.boxShadow='0 10px 20px rgba(255,107,107,0.4)';
+        ">
+          📞 ${t.contactAdmin}
+        </a>
+        
+        <div style="
+          margin-top: 30px; 
+          font-size: 14px; 
+          opacity: 0.7;
+          border-top: 1px solid rgba(255,255,255,0.2);
+          padding-top: 20px;
+        ">
+          © 2024 FOXBET - Secure License System<br/>
+          🛡️ No old button access allowed - Always validated
+        </div>
+      </div>
+      
+      <style>
+        @keyframes lockPulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.15); opacity: 0.8; text-shadow: 0 0 30px rgba(255,255,255,0.8); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+          from { 
+            opacity: 0; 
+            transform: translateY(-50px) scale(0.9); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+          }
+        }
+        
+        * {
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+        }
+      </style>
+    </div>
+  `;
   
   // NUCLEAR OPTION: Prevent any further JavaScript execution
   console.log('🚫 COMPLETELY BLOCKING ALL ACCESS - NO OLD BUTTONS ALLOWED');
@@ -308,6 +437,12 @@ function showExpiredScreen(title, message, lang) {
   // Disable setTimeout/setInterval
   window.setTimeout = function() {};
   window.setInterval = function() {};
+  
+  // Remove all existing intervals/timeouts
+  for (let i = 0; i < 10000; i++) {
+    clearTimeout(i);
+    clearInterval(i);
+  }
   
   console.log('🔒 WEBAPP LOCKED DOWN - OLD BUTTONS BLOCKED');
 }
@@ -457,7 +592,19 @@ function populateGames() {
     
     const category = game.category === "1win bet" ? t.category1win : t.categoryOther;
     
-    gameCard.innerHTML = '<div class="game-image" style="background-image: url(\\'' + game.image + '\\');"><div class="game-overlay"><div class="play-btn" aria-label="Jouer à ' + game.name + '"><i class="fas fa-play"></i></div></div></div><div class="game-info"><div class="game-name">' + game.name + '</div><div class="game-category">' + category + '</div></div>';
+    gameCard.innerHTML = `
+      <div class="game-image" style="background-image: url('${game.image}');">
+        <div class="game-overlay">
+          <div class="play-btn" aria-label="Jouer à ${game.name}">
+            <i class="fas fa-play"></i>
+          </div>
+        </div>
+      </div>
+      <div class="game-info">
+        <div class="game-name">${game.name}</div>
+        <div class="game-category">${category}</div>
+      </div>
+    `;
     
     gamesGrid.appendChild(gameCard);
   });
