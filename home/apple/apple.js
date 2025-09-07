@@ -32,7 +32,7 @@ class AppleCassa {
                 reset: "إعادة تعيين",
                 back: "رجوع",
                 limitReached: "تم الوصول إلى الحد! انقر على إعادة تعيين",
-                noLang: "يرجى تكوين اللغة в البوت الخاص بك وإعادة المحاولة"
+                noLang: "يرجى تكوين اللغة في البوت الخاص بك وإعادة المحاولة"
             }
         };
 
@@ -41,44 +41,70 @@ class AppleCassa {
             return;
         }
 
+        // --- NEW --- This will hold the state for the "hard" random part (Row 5+).
+        this.predictionBag = [];
+
         this.updateLanguage(this.language);
         this.initializeApp();
     }
 
-    // --- NEW CORE LOGIC FUNCTION ---
-    // This function calculates the prediction based on the current row number.
-    _getPredictionForRow(rowNumber) {
-        let weights;
-
-        // The probabilities change depending on the row number.
-        if (rowNumber === 1) {
-            // Row 1 (Very Easy): High chance for the middle circle.
-            // [pos1, pos2, pos3 (middle), pos4, pos5]
-            weights = [0.05, 0.10, 0.70, 0.10, 0.05]; // 70% chance for middle
-        } else if (rowNumber === 2) {
-            // Row 2 (Easy): Middle is still likely, but less so.
-            weights = [0.10, 0.20, 0.40, 0.20, 0.10]; // 40% chance for middle
-        } else if (rowNumber === 3) {
-            // Row 3 (Medium): The odds are spreading out.
-            weights = [0.15, 0.20, 0.30, 0.20, 0.15]; // 30% chance for middle
-        } else {
-            // Row 4 and beyond (Hard): The game is completely fair.
-            weights = [0.20, 0.20, 0.20, 0.20, 0.20]; // 20% chance for each
-        }
-
-        // Helper to pick an index based on the weights array.
-        const roll = Math.random();
-        let cumulativeProbability = 0;
-        for (let i = 0; i < weights.length; i++) {
-            cumulativeProbability += weights[i];
-            if (roll < cumulativeProbability) {
-                console.log(`Row: ${rowNumber}, Difficulty: ${rowNumber > 3 ? 'Hard' : 'Easy/Medium'}, Choice: ${i}`);
-                return i; // Return the chosen circle index
+    // --- NEW HELPER 1 --- For the hard part of the game (Row 5 and beyond).
+    _getNextFromShuffledBag() {
+        if (this.predictionBag.length === 0) {
+            this.predictionBag = [0, 1, 2, 3, 4];
+            for (let i = this.predictionBag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
             }
         }
-        
-        // Fallback for any floating point inaccuracies
-        return weights.length - 1;
+        return this.predictionBag.pop();
+    }
+
+    // --- NEW CORE LOGIC FUNCTION --- This implements YOUR specific rules.
+    _getPatternedPrediction(rowNumber) {
+        let choices;
+        const roll = Math.random(); // A random number for weighted choices.
+
+        switch (rowNumber) {
+            case 1:
+                // Rule: "best 1,2,4,5" -> The prediction will be one of these four.
+                console.log("Row 1: Predicting one of [1, 2, 4, 5]");
+                choices = [0, 1, 3, 4];
+                return choices[Math.floor(Math.random() * choices.length)];
+
+            case 2:
+                // Rule: "best 1,4,5 and sometime 3" -> High chance for 1,4,5, low chance for 3.
+                console.log("Row 2: High chance for [1, 4, 5], low for [3]");
+                if (roll < 0.85) { // 85% chance for a "best" choice
+                    choices = [0, 3, 4];
+                    return choices[Math.floor(Math.random() * choices.length)];
+                } else { // 15% chance for the "sometime" choice
+                    return 2; // Index for position 3
+                }
+
+            case 3:
+                // Rule: "best 4,5 and sometime 2,1"
+                console.log("Row 3: High chance for [4, 5], low for [1, 2]");
+                if (roll < 0.80) { // 80% chance for a "best" choice
+                    return Math.random() < 0.5 ? 3 : 4; // Index 3 or 4
+                } else { // 20% chance for a "sometime" choice
+                    return Math.random() < 0.5 ? 0 : 1; // Index 0 or 1
+                }
+            
+            case 4:
+                // Rule: "best 1,3 and sometime 4,5"
+                console.log("Row 4: High chance for [1, 3], low for [4, 5]");
+                 if (roll < 0.75) { // 75% chance for a "best" choice
+                    return Math.random() < 0.5 ? 0 : 2; // Index 0 or 2
+                } else { // 25% chance for a "sometime" choice
+                    return Math.random() < 0.5 ? 3 : 4; // Index 3 or 4
+                }
+
+            default:
+                // Rule: "fifth to the end... hard... everytime diffrent"
+                console.log(`Row ${rowNumber}: Hard mode. Truly random.`);
+                return this._getNextFromShuffledBag();
+        }
     }
 
     getLanguageFromURL() {
@@ -172,8 +198,8 @@ class AppleCassa {
             const currentRow = circleContainer.firstElementChild;
             const t = this.translations[this.language] || this.translations.fr;
             
-            // --- MODIFIED --- Get the current row number to determine the difficulty.
-            const currentRowNumber = rows.length; 
+            // Get the current row number to determine which rule to apply.
+            const currentRowNumber = rows.length;
 
             if (rows.length >= 11) {
                 const alertBox = document.getElementById('alertBox');
@@ -184,8 +210,8 @@ class AppleCassa {
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
                 
-                // --- MODIFIED --- Get the prediction using the new "Dynamic Luck" logic.
-                const randomIndex = this._getPredictionForRow(currentRowNumber);
+                // --- MODIFIED --- Get the prediction using your custom pattern logic.
+                const randomIndex = this._getPatternedPrediction(currentRowNumber);
 
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
@@ -205,6 +231,9 @@ class AppleCassa {
     }
 
     handleReset() {
+        // --- MODIFIED --- Reset the bag so the "hard mode" sequence is fresh.
+        this.predictionBag = [];
+
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
         circleContainer.innerHTML = `
