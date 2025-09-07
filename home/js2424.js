@@ -10,7 +10,7 @@ const translations = {
     'noLangError': "Veuillez configurer la langue dans le bot avant de continuer",
     'category1win': "1win bet",
     'categoryOther': "Autres Bets",
-    'licenseExpired': "🔒 Votre licence a expiré",
+    'licenseExpired': "🔒 Votre Licence a Expiré",
     'licenseExpiredMessage': "Votre accès Premium a expiré. Contactez l'administrateur pour renouveler votre licence.",
     'contactAdmin': "Contacter l'administrateur",
     'validatingLicense': "Vérification de votre licence...",
@@ -121,10 +121,6 @@ const gamesData = [{
   'category': "Autres Bets"
 }];
 
-// ✅ IMPORTANT: Replace this with your actual backend server URL
-// This is where your APIs are running (NOT on Netlify)
-const BACKEND_URL = 'https://multilingual-telegram-bot-w-431.created.app'; // CHANGE THIS TO YOUR ACTUAL BACKEND URL
-
 function sanitizeInput(input) {
   const div = document.createElement("div");
   div.textContent = input;
@@ -169,7 +165,7 @@ function parseProfileFromUrl() {
   }
 }
 
-// ✅ FIXED: License validation calling your backend APIs
+// ✅ CRITICAL: Real-time license validation with your bot database
 async function validateUserLicense() {
   const telegramId = getParam('i');
   const lang = getParam("lang") || 'fr';
@@ -180,7 +176,6 @@ async function validateUserLicense() {
   console.log('📋 Full URL:', window.location.href);
   console.log('🆔 Telegram ID from URL:', telegramId);
   console.log('🌍 Language:', lang);
-  console.log('🖥️  Backend URL:', BACKEND_URL);
   
   // Check if telegram ID is valid
   if (!telegramId || telegramId === '' || telegramId === 'null' || telegramId === 'undefined') {
@@ -204,21 +199,18 @@ async function validateUserLicense() {
   }
   
   try {
-    console.log('📡 === CALLING YOUR BACKEND API ===');
-    
-    // ✅ FIXED: Call the full backend URL instead of relative path
-    const apiUrl = `${BACKEND_URL}/api/check-license-validity`;
-    console.log('🎯 API Endpoint:', apiUrl);
-    console.log('📤 Sending telegram_id:', telegramIdInt, 'type:', typeof telegramIdInt);
+    console.log('📡 === MAKING API CALL TO YOUR BOT SYSTEM ===');
+    console.log('🎯 API Endpoint: /api/check-license-validity');
+    console.log('📤 Sending telegram_id:', telegramIdInt);
     
     const requestBody = { telegram_id: telegramIdInt };
     console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
     
-    const response = await fetch(apiUrl, {
+    // CRITICAL: This connects to your bot's license checking system
+    const response = await fetch('/api/check-license-validity', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
     });
@@ -235,14 +227,13 @@ async function validateUserLicense() {
     const data = await response.json();
     console.log('📊 Response data:', JSON.stringify(data, null, 2));
     
-    // CRITICAL DECISION LOGIC
+    // CRITICAL DECISION LOGIC - CONNECTS TO YOUR BOT DATABASE
     console.log('🎯 === LICENSE VALIDATION DECISION ===');
     console.log('✅ data.success:', data.success);
     console.log('✅ data.valid:', data.valid);
     console.log('❌ data.expired:', data.expired);
     console.log('📅 data.expires_at:', data.expires_at);
     console.log('💬 data.message:', data.message);
-    console.log('⚠️  data.error:', data.error);
     
     // Check if license is valid - STRICT validation
     if (data.success === true && data.valid === true) {
@@ -262,22 +253,13 @@ async function validateUserLicense() {
     console.error('💥 === LICENSE VALIDATION ERROR ===');
     console.error('Error details:', error);
     console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
     
-    // Show helpful error message
-    let errorMessage = "Could not validate license with server. ";
-    if (error.message.includes('Failed to fetch')) {
-      errorMessage += "Please check if the backend server is running and accessible.";
-    } else {
-      errorMessage += error.message;
-    }
-    
-    showExpiredScreen(t.licenseError, errorMessage, lang);
+    showExpiredScreen(t.licenseError, "Could not validate license: " + error.message, lang);
     return false;
   }
 }
 
-// Show expired license screen - COMPLETELY BLOCKS webapp
+// ✅ CRITICAL: Show expired license screen - COMPLETELY BLOCKS webapp
 function showExpiredScreen(title, message, lang) {
   const t = translations[lang] || translations.fr;
   const lk = getParam('lk');
@@ -287,7 +269,7 @@ function showExpiredScreen(title, message, lang) {
   console.log('💬 Message:', message);
   console.log('🌍 Language:', lang);
   
-  // COMPLETELY REPLACE PAGE CONTENT
+  // COMPLETELY REPLACE PAGE CONTENT - NO ACCESS TO GAMES
   document.body.innerHTML = `
     <div style="
       display: flex; 
@@ -348,36 +330,13 @@ function showExpiredScreen(title, message, lang) {
           border-radius: 15px;
           border: 1px solid rgba(255,255,255,0.2);
         ">
-          <p style="font-size: 16px; margin-bottom: 15px; opacity: 0.9;">🚫 Access Denied:</p>
+          <p style="font-size: 16px; margin-bottom: 15px; opacity: 0.9;">🚫 Access Denied Because:</p>
           <ul style="list-style: none; padding: 0; margin: 0;">
-            <li style="margin: 8px 0; font-size: 15px;">❌ License validation failed</li>
-            <li style="margin: 8px 0; font-size: 15px;">❌ Invalid or expired license</li>
-            <li style="margin: 8px 0; font-size: 15px;">❌ Server connection issue</li>
+            <li style="margin: 8px 0; font-size: 15px;">❌ License has expired</li>
+            <li style="margin: 8px 0; font-size: 15px;">❌ No valid Premium subscription</li>
+            <li style="margin: 8px 0; font-size: 15px;">❌ Account verification failed</li>
           </ul>
         </div>
-        
-        <button onclick="window.location.reload()" style="
-          display: inline-block;
-          background: linear-gradient(45deg, #4ECDC4, #45B7D1);
-          color: white;
-          padding: 15px 35px;
-          border-radius: 30px;
-          border: none;
-          font-weight: 700;
-          font-size: 16px;
-          margin-right: 15px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 10px 20px rgba(78,205,196,0.4);
-        " onmouseover="
-          this.style.transform='translateY(-3px) scale(1.05)';
-          this.style.boxShadow='0 15px 30px rgba(78,205,196,0.6)';
-        " onmouseout="
-          this.style.transform='translateY(0) scale(1)';
-          this.style.boxShadow='0 10px 20px rgba(78,205,196,0.4)';
-        ">
-          🔄 Retry
-        </button>
         
         <a href="https://t.me/${lk || 'admin'}" style="
           display: inline-block;
@@ -387,7 +346,7 @@ function showExpiredScreen(title, message, lang) {
           border-radius: 30px;
           text-decoration: none;
           font-weight: 700;
-          font-size: 16px;
+          font-size: 18px;
           transition: all 0.3s ease;
           box-shadow: 0 10px 20px rgba(255,107,107,0.4);
           text-transform: uppercase;
@@ -643,7 +602,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 === WEBAPP INITIALIZATION STARTING ===');
   console.log('📅 Time:', new Date().toISOString());
   console.log('🌐 URL:', window.location.href);
-  console.log('🖥️  Backend URL:', BACKEND_URL);
   
   // Step 1: Check language
   console.log('📋 Step 1: Language check');
@@ -660,8 +618,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('✅ Basic setup completed');
   
   // Step 3: ⚡ CRITICAL - Validate license BEFORE showing anything
-  console.log('📋 Step 3: LICENSE VALIDATION - CALLING YOUR BACKEND API');
-  console.log('🔐 === STARTING LICENSE VALIDATION ===');
+  console.log('📋 Step 3: LICENSE VALIDATION - CONNECTS TO YOUR BOT DATABASE');
+  console.log('🔐 === STARTING REAL-TIME LICENSE VALIDATION ===');
   
   const licenseValid = await validateUserLicense();
   
@@ -733,3 +691,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('🎉 === WEBAPP FULLY LOADED AND SECURED ===');
   console.log('✅ User has valid license and can access games');
 });
+
+
