@@ -165,7 +165,7 @@ function parseProfileFromUrl() {
   }
 }
 
-// ✅ CRITICAL: Real-time license validation with your bot database
+// ✅ ENHANCED: License validation with multiple endpoint fallbacks and better error handling
 async function validateUserLicense() {
   const telegramId = getParam('i');
   const lang = getParam("lang") || 'fr';
@@ -176,6 +176,7 @@ async function validateUserLicense() {
   console.log('📋 Full URL:', window.location.href);
   console.log('🆔 Telegram ID from URL:', telegramId);
   console.log('🌍 Language:', lang);
+  console.log('🕐 Current time:', new Date().toISOString());
   
   // Check if telegram ID is valid
   if (!telegramId || telegramId === '' || telegramId === 'null' || telegramId === 'undefined') {
@@ -198,65 +199,104 @@ async function validateUserLicense() {
     loadingText.textContent = t.validatingLicense;
   }
   
-  try {
-    console.log('📡 === MAKING API CALL TO YOUR BOT SYSTEM ===');
-    console.log('🎯 API Endpoint: /api/check-license-validity');
-    console.log('📤 Sending telegram_id:', telegramIdInt);
+  // ✅ TRY MULTIPLE ENDPOINTS WITH COMPREHENSIVE ERROR HANDLING
+  const endpoints = [
+    '/api/check-license-validity',
+    '/api/validate-license',  // fallback endpoint
+  ];
+  
+  for (let i = 0; i < endpoints.length; i++) {
+    const endpoint = endpoints[i];
+    console.log(`🎯 === TRYING ENDPOINT ${i + 1}/${endpoints.length}: ${endpoint} ===`);
     
-    const requestBody = { telegram_id: telegramIdInt };
-    console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
-    
-    // CRITICAL: This connects to your bot's license checking system
-    const response = await fetch('/api/check-license-validity', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-    
-    console.log('📥 === API RESPONSE ===');
-    console.log('🔢 Status:', response.status, response.statusText);
-    console.log('✅ Response OK:', response.ok);
-    
-    if (!response.ok) {
-      console.error('❌ API response not ok:', response.status);
-      throw new Error(`API returned ${response.status}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log('📊 Response data:', JSON.stringify(data, null, 2));
-    
-    // CRITICAL DECISION LOGIC - CONNECTS TO YOUR BOT DATABASE
-    console.log('🎯 === LICENSE VALIDATION DECISION ===');
-    console.log('✅ data.success:', data.success);
-    console.log('✅ data.valid:', data.valid);
-    console.log('❌ data.expired:', data.expired);
-    console.log('📅 data.expires_at:', data.expires_at);
-    console.log('💬 data.message:', data.message);
-    
-    // Check if license is valid - STRICT validation
-    if (data.success === true && data.valid === true) {
-      console.log('✅ ✅ ✅ LICENSE IS VALID - ALLOWING ACCESS ✅ ✅ ✅');
-      return true;
-    } else {
-      // License is invalid/expired - BLOCK ACCESS
-      console.log('❌ ❌ ❌ LICENSE IS INVALID/EXPIRED - BLOCKING ACCESS ❌ ❌ ❌');
-      console.log('🚫 Blocking reason:', data.message || data.error || 'License validation failed');
+    try {
+      const requestBody = { telegram_id: telegramIdInt };
+      console.log('📤 Sending:', JSON.stringify(requestBody, null, 2));
       
-      const message = data.message || data.error || t.licenseExpiredMessage;
-      showExpiredScreen(t.licenseExpired, message, lang);
-      return false;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+      
+      console.log('📥 Response status:', response.status, response.statusText);
+      console.log('📋 Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      // If this endpoint works, process the response
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Response data:', JSON.stringify(data, null, 2));
+        
+        // ENHANCED LICENSE VALIDATION LOGIC
+        console.log('🎯 === LICENSE VALIDATION DECISION ===');
+        console.log('✅ data.success:', data.success);
+        console.log('✅ data.valid:', data.valid);
+        console.log('❌ data.expired:', data.expired);
+        console.log('💬 data.message:', data.message);
+        console.log('⚠️  data.error:', data.error);
+        
+        // Check if license is valid with multiple validation patterns
+        const isValid = (
+          (data.success === true && data.valid === true) ||  // Standard validation
+          (data.success === true && !data.expired && !data.error) ||  // Alternative validation
+          (data.license && data.license.expiresAt)  // Validate-license endpoint format
+        );
+        
+        if (isValid) {
+          console.log('✅ ✅ ✅ LICENSE IS VALID - ALLOWING ACCESS ✅ ✅ ✅');
+          return true;
+        } else {
+          console.log('❌ ❌ ❌ LICENSE IS INVALID/EXPIRED - BLOCKING ACCESS ❌ ❌ ❌');
+          const message = data.message || data.error || t.licenseExpiredMessage;
+          showExpiredScreen(t.licenseExpired, message, lang);
+          return false;
+        }
+      } else {
+        // This endpoint failed, try next one
+        console.log(`❌ Endpoint ${endpoint} failed with status ${response.status}`);
+        
+        // Try to get error message from response
+        try {
+          const errorData = await response.text();
+          console.log('💬 Error response:', errorData);
+        } catch (e) {
+          console.log('❌ Could not read error response');
+        }
+        
+        // If this is the last endpoint, show error
+        if (i === endpoints.length - 1) {
+          throw new Error(`All endpoints failed. Last error: ${response.status} ${response.statusText}`);
+        }
+        
+        console.log(`🔄 Trying next endpoint...`);
+        continue;
+      }
+      
+    } catch (error) {
+      console.error(`💥 Error with endpoint ${endpoint}:`, error);
+      
+      // If this is the last endpoint, show error screen
+      if (i === endpoints.length - 1) {
+        console.error('💥 === ALL ENDPOINTS FAILED ===');
+        showExpiredScreen(
+          t.licenseError, 
+          "Server connection failed. Please try again or contact support.",
+          lang
+        );
+        return false;
+      }
+      
+      console.log(`🔄 Trying next endpoint due to error...`);
     }
-    
-  } catch (error) {
-    console.error('💥 === LICENSE VALIDATION ERROR ===');
-    console.error('Error details:', error);
-    console.error('Error message:', error.message);
-    
-    showExpiredScreen(t.licenseError, "Could not validate license: " + error.message, lang);
-    return false;
   }
+  
+  // This should never be reached, but safety fallback
+  console.error('💥 Unexpected end of validation function');
+  showExpiredScreen(t.licenseError, "Unexpected validation error", lang);
+  return false;
 }
 
 // ✅ CRITICAL: Show expired license screen - COMPLETELY BLOCKS webapp
@@ -330,11 +370,12 @@ function showExpiredScreen(title, message, lang) {
           border-radius: 15px;
           border: 1px solid rgba(255,255,255,0.2);
         ">
-          <p style="font-size: 16px; margin-bottom: 15px; opacity: 0.9;">🚫 Access Denied Because:</p>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            <li style="margin: 8px 0; font-size: 15px;">❌ License has expired</li>
-            <li style="margin: 8px 0; font-size: 15px;">❌ No valid Premium subscription</li>
-            <li style="margin: 8px 0; font-size: 15px;">❌ Account verification failed</li>
+          <p style="font-size: 16px; margin-bottom: 15px; opacity: 0.9;">⚠️ Debug Information:</p>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; text-align: left;">
+            <li style="margin: 5px 0;">🌐 URL: ${window.location.href}</li>
+            <li style="margin: 5px 0;">🆔 Telegram ID: ${getParam('i')}</li>
+            <li style="margin: 5px 0;">🌍 Language: ${lang}</li>
+            <li style="margin: 5px 0;">🕐 Time: ${new Date().toLocaleString()}</li>
           </ul>
         </div>
         
@@ -369,7 +410,7 @@ function showExpiredScreen(title, message, lang) {
           padding-top: 20px;
         ">
           © 2024 FOXBET - Protected by Advanced License System<br/>
-          🛡️ Unauthorized access attempts are logged and monitored
+          🛡️ If you have a valid license, please refresh the page or contact support
         </div>
       </div>
       
@@ -400,23 +441,6 @@ function showExpiredScreen(title, message, lang) {
       </style>
     </div>
   `;
-  
-  // NUCLEAR OPTION: Prevent any further JavaScript execution
-  console.log('🚫 DISABLING ALL FURTHER JAVASCRIPT EXECUTION');
-  
-  // Disable all event listeners
-  window.addEventListener = function() {};
-  document.addEventListener = function() {};
-  
-  // Disable setTimeout/setInterval
-  window.setTimeout = function() {};
-  window.setInterval = function() {};
-  
-  // Remove all existing intervals/timeouts
-  for(let i = 0; i < 10000; i++) {
-    clearTimeout(i);
-    clearInterval(i);
-  }
   
   console.log('🔒 WEBAPP COMPLETELY LOCKED DOWN');
 }
@@ -597,11 +621,12 @@ function handleScroll() {
   }
 }
 
-// ✅ MAIN INITIALIZATION - License validation FIRST!
+// ✅ MAIN INITIALIZATION - Enhanced with better error handling
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 === WEBAPP INITIALIZATION STARTING ===');
   console.log('📅 Time:', new Date().toISOString());
   console.log('🌐 URL:', window.location.href);
+  console.log('🔧 User Agent:', navigator.userAgent);
   
   // Step 1: Check language
   console.log('📋 Step 1: Language check');
@@ -618,8 +643,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('✅ Basic setup completed');
   
   // Step 3: ⚡ CRITICAL - Validate license BEFORE showing anything
-  console.log('📋 Step 3: LICENSE VALIDATION - CONNECTS TO YOUR BOT DATABASE');
-  console.log('🔐 === STARTING REAL-TIME LICENSE VALIDATION ===');
+  console.log('📋 Step 3: ENHANCED LICENSE VALIDATION');
+  console.log('🔐 === STARTING COMPREHENSIVE LICENSE VALIDATION ===');
   
   const licenseValid = await validateUserLicense();
   
