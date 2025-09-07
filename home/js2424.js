@@ -123,7 +123,7 @@ const gamesData = [{
 
 // ✅ IMPORTANT: Replace this with your actual backend server URL
 // This is where your APIs are running (NOT on Netlify)
-const BACKEND_URL = 'https://multilingual-telegram-bot-w-431.created.app'; // CHANGE THIS TO YOUR ACTUAL BACKEND URL
+const BACKEND_URL = 'https://multilingual-telegram-bot-w-431.created.app/api/check-license-validity'; // CHANGE THIS TO YOUR ACTUAL BACKEND URL
 
 function sanitizeInput(input) {
   const div = document.createElement("div");
