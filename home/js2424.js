@@ -9,7 +9,8 @@ const translations = {
     category1win: "1win bet",
     categoryOther: "Autres Bets",
     licenseExpired: "🔒 Votre licence a expiré",
-    licenseExpiredMessage: "Votre accès Premium a expiré. Contactez l'administrateur pour renouveler votre licence.",
+    licenseExpiredMessage:
+      "Votre accès Premium a expiré. Contactez l'administrateur pour renouveler votre licence.",
     contactAdmin: "Contacter l'administrateur",
     validatingLicense: "Vérification de votre licence...",
     licenseError: "Erreur de validation de licence",
@@ -24,7 +25,8 @@ const translations = {
     category1win: "1win bet",
     categoryOther: "Other Bets",
     licenseExpired: "🔒 Your License Has Expired",
-    licenseExpiredMessage: "Your Premium access has expired. Please contact the administrator to renew your license.",
+    licenseExpiredMessage:
+      "Your Premium access has expired. Please contact the administrator to renew your license.",
     contactAdmin: "Contact Administrator",
     validatingLicense: "Validating your license...",
     licenseError: "License validation error",
@@ -39,8 +41,9 @@ const translations = {
     category1win: "1win ставка",
     categoryOther: "Другие ставки",
     licenseExpired: "🔒 Срок действия вашей лицензии истек",
-    licenseExpiredMessage: "Срок действия вашего Premium доступа истек. Обратитесь к администратору для продления лицензии.",
-    contactAdmin: "Связаться с администратором",
+    licenseExpiredMessage:
+      "Срок действия вашего Premium доступа истек. Обратитесь к администратору для продления лицензии.",
+    contactAdmin: "Связаться с администрator",
     validatingLicense: "Проверка вашей лицензии...",
     licenseError: "Ошибка проверки лицензии",
   },
@@ -54,7 +57,8 @@ const translations = {
     category1win: "رهان 1win",
     categoryOther: "رهانات أخرى",
     licenseExpired: "🔒 انتهت صلاحية ترخيصك",
-    licenseExpiredMessage: "انتهت صلاحية وصولك المميز. يرجى الاتصال بالمشرف لتجديد ترخيصك.",
+    licenseExpiredMessage:
+      "انتهت صلاحية وصولك المميز. يرجى الاتصال بالمشرف لتجديد ترخيصك.",
     contactAdmin: "اتصل بالمشرف",
     validatingLicense: "جارٍ التحقق من ترخيصك...",
     licenseError: "خطأ في التحقق من الترخيص",
@@ -124,8 +128,12 @@ const gamesData = [
   },
 ];
 
-// ✅ IMPORTANT: Your backend server URL
-const BACKEND_URL = "https://multilingual-telegram-bot-w-431.created.app";
+// ✅ FIXED: Use local API instead of external backend
+// This will work both locally and when deployed to the same domain
+// No need for external backend URL that may not have the same database
+
+// Remove the external backend URL and use local API
+// const BACKEND_URL = "https://multilingual-telegram-bot-w-431.created.app";
 
 // Security state - NO ACCESS until validated
 let licenseValidated = false;
@@ -157,10 +165,10 @@ function getGameUrlWithParams(gameUrl) {
   return gameUrl + (params.toString() ? "?" + params.toString() : "");
 }
 
-// ✅ NUCLEAR LICENSE VALIDATION - BLOCKS EVERYTHING
+// ✅ SMART LICENSE VALIDATION - WORKS LOCALLY AND ON NETLIFY
 async function validateUserLicense() {
   if (isValidating) {
-    console.log('🔄 License validation already in progress...');
+    console.log("🔄 License validation already in progress...");
     return false;
   }
 
@@ -169,15 +177,24 @@ async function validateUserLicense() {
   const lang = getParam("lang") || "fr";
   const t = translations[lang] || translations.fr;
 
-  console.log("🔍 === CRITICAL LICENSE VALIDATION STARTING ===");
+  console.log("🔍 === SMART LICENSE VALIDATION STARTING ===");
   console.log("📋 Full URL:", window.location.href);
   console.log("🆔 Telegram ID from URL:", telegramId);
-  console.log("🖥️ Backend URL:", BACKEND_URL);
+  console.log("🌐 Hostname:", window.location.hostname);
 
   // STRICT ID VALIDATION
-  if (!telegramId || telegramId === "" || telegramId === "null" || telegramId === "undefined") {
+  if (
+    !telegramId ||
+    telegramId === "" ||
+    telegramId === "null" ||
+    telegramId === "undefined"
+  ) {
     console.log("❌ MISSING TELEGRAM ID - COMPLETE LOCKDOWN");
-    showExpiredScreen(t.licenseError, "No user ID provided. Please use the bot to access games.", lang);
+    showExpiredScreen(
+      t.licenseError,
+      "No user ID provided. Please use the bot to access games.",
+      lang,
+    );
     return false;
   }
 
@@ -188,10 +205,35 @@ async function validateUserLicense() {
     return false;
   }
 
-  try {
-    console.log("📡 === CALLING YOUR BACKEND API ===");
+  // ✅ SMART DETECTION: Check if we're on Netlify or local
+  const isNetlify =
+    window.location.hostname.includes("netlify") ||
+    window.location.hostname.includes("github.io") ||
+    window.location.hostname.includes("vercel.app");
 
-    const apiUrl = `${BACKEND_URL}/api/check-license-validity`;
+  try {
+    console.log("📡 === CALLING LICENSE API ===");
+    console.log(
+      "🔍 Environment detected:",
+      isNetlify ? "NETLIFY/STATIC" : "LOCAL/DYNAMIC",
+    );
+
+    let apiUrl,
+      useExternal = false;
+
+    if (isNetlify) {
+      // For Netlify, try external backend first
+      console.log("🌐 NETLIFY DETECTED - Using external backend");
+      apiUrl =
+        "https://multilingual-telegram-bot-w-431.created.app/api/check-license-validity";
+      useExternal = true;
+    } else {
+      // For local/dynamic hosting, use local API
+      console.log("🏠 LOCAL DETECTED - Using local API");
+      apiUrl = "/api/check-license-validity";
+      useExternal = false;
+    }
+
     console.log("🎯 API Endpoint:", apiUrl);
 
     const requestBody = { telegram_id: telegramIdInt };
@@ -211,16 +253,50 @@ async function validateUserLicense() {
     console.log("✅ Response OK:", response.ok);
 
     if (!response.ok) {
+      // If external API fails on Netlify, try local fallback
+      if (useExternal && response.status >= 400) {
+        console.log("⚠️ External API failed, trying local fallback...");
+
+        const fallbackUrl = "/api/check-license-validity";
+        try {
+          const fallbackResponse = await fetch(fallbackUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            console.log("✅ Fallback API succeeded:", fallbackData);
+
+            if (fallbackData.success === true && fallbackData.valid === true) {
+              console.log(
+                "✅ ✅ ✅ FALLBACK LICENSE IS VALID - ALLOWING ACCESS ✅ ✅ ✅",
+              );
+              licenseValidated = true;
+              return true;
+            }
+          }
+        } catch (fallbackError) {
+          console.log("❌ Fallback also failed:", fallbackError.message);
+        }
+      }
+
       console.error("❌ API response not ok:", response.status);
       const errorText = await response.text();
       console.error("❌ Error response body:", errorText);
-      throw new Error(`API returned ${response.status}: ${response.statusText} - ${errorText}`);
+      throw new Error(
+        `API returned ${response.status}: ${response.statusText}`,
+      );
     }
 
     const data = await response.json();
     console.log("📊 Response data:", JSON.stringify(data, null, 2));
 
-    // CRITICAL DECISION LOGIC
+    // CRITICAL DECISION LOGIC - WORKS WITH BOTH APIs
     console.log("🎯 === LICENSE VALIDATION DECISION ===");
     console.log("✅ data.success:", data.success);
     console.log("✅ data.valid:", data.valid);
@@ -228,15 +304,25 @@ async function validateUserLicense() {
     console.log("📅 data.expires_at:", data.expires_at);
     console.log("💬 data.message:", data.message);
 
-    // Check if license is valid - ULTRA STRICT validation
+    // Check if license is valid - UNIVERSAL FORMAT
     if (data.success === true && data.valid === true) {
       console.log("✅ ✅ ✅ LICENSE IS VALID - ALLOWING ACCESS ✅ ✅ ✅");
+      console.log(
+        "🎉 Using",
+        useExternal ? "EXTERNAL" : "LOCAL",
+        "API successfully",
+      );
       licenseValidated = true;
       return true;
     } else {
       // License is invalid/expired - TOTAL LOCKDOWN
-      console.log("❌ ❌ ❌ LICENSE IS INVALID/EXPIRED - TOTAL LOCKDOWN ❌ ❌ ❌");
-      console.log("🚫 Blocking reason:", data.message || data.error || "License validation failed");
+      console.log(
+        "❌ ❌ ❌ LICENSE IS INVALID/EXPIRED - TOTAL LOCKDOWN ❌ ❌ ❌",
+      );
+      console.log(
+        "🚫 Blocking reason:",
+        data.message || data.error || "License validation failed",
+      );
 
       const message = data.message || data.error || t.licenseExpiredMessage;
       showExpiredScreen(t.licenseExpired, message, lang);
@@ -246,13 +332,32 @@ async function validateUserLicense() {
     console.error("💥 === LICENSE VALIDATION ERROR ===");
     console.error("Error details:", error);
 
-    let errorMessage = "Could not validate license with server. ";
-    if (error.message.includes("Failed to fetch")) {
-      errorMessage += "Network connection failed. Please check your internet connection.";
-    } else if (error.message.includes("CORS")) {
-      errorMessage += "CORS policy issue. Please check server configuration.";
+    // ✅ SMART ERROR HANDLING BASED ON ENVIRONMENT
+    let errorMessage = "Could not validate license. ";
+
+    if (isNetlify) {
+      errorMessage += "External license server may be unavailable. ";
+      if (error.message.includes("Failed to fetch")) {
+        errorMessage +=
+          "Please check your internet connection or try again later.";
+      } else if (error.message.includes("CORS")) {
+        errorMessage += "Server configuration issue detected.";
+      } else {
+        errorMessage += "Please contact administrator.";
+      }
     } else {
-      errorMessage += error.message;
+      if (error.message.includes("Failed to fetch")) {
+        errorMessage +=
+          "Please ensure you're accessing this from the correct domain.";
+      } else if (error.message.includes("404")) {
+        errorMessage +=
+          "License validation API not found. Please contact administrator.";
+      } else if (error.message.includes("500")) {
+        errorMessage +=
+          "Server error occurred. Please try again or contact administrator.";
+      } else {
+        errorMessage += error.message;
+      }
     }
 
     showExpiredScreen(t.licenseError, errorMessage, lang);
@@ -427,15 +532,15 @@ function showExpiredScreen(title, message, lang) {
 
   // DISABLE ALL JAVASCRIPT EXECUTION
   console.log("🚫 DISABLING ALL FURTHER JAVASCRIPT EXECUTION");
-  
+
   // Disable event listeners
   window.addEventListener = function () {};
   document.addEventListener = function () {};
-  
+
   // Disable timers
   window.setTimeout = function () {};
   window.setInterval = function () {};
-  
+
   // Clear all existing timers
   for (let i = 0; i < 10000; i++) {
     clearTimeout(i);
@@ -448,7 +553,7 @@ function showExpiredScreen(title, message, lang) {
 // Show loading screen during validation
 function showValidationScreen(lang) {
   const t = translations[lang] || translations.fr;
-  
+
   document.body.innerHTML = `
     <div id="validationScreen" style="
       display: flex;
@@ -494,7 +599,9 @@ function showValidationScreen(lang) {
 // ONLY show games if license is validated
 function showGamesInterface() {
   if (!licenseValidated) {
-    console.log('🚫 Attempted to show games without license validation - BLOCKED');
+    console.log(
+      "🚫 Attempted to show games without license validation - BLOCKED",
+    );
     return;
   }
 
@@ -502,7 +609,7 @@ function showGamesInterface() {
   const us = getParam("us");
   const t = translations[lang] || translations.fr;
 
-  console.log('🎮 === SHOWING GAMES (LICENSE VALIDATED) ===');
+  console.log("🎮 === SHOWING GAMES (LICENSE VALIDATED) ===");
 
   document.body.innerHTML = `
     <div style="
@@ -529,7 +636,9 @@ function showGamesInterface() {
           🦊 ${t.brandName}
         </h1>
         
-        ${us ? `<div style="
+        ${
+          us
+            ? `<div style="
           margin-top: 10px;
           background: rgba(255,255,255,0.1);
           padding: 10px 20px;
@@ -537,7 +646,9 @@ function showGamesInterface() {
           display: inline-block;
         ">
           👤 ${us}
-        </div>` : ''}
+        </div>`
+            : ""
+        }
       </div>
 
       <!-- Games Section -->
@@ -594,7 +705,8 @@ function showGamesInterface() {
         backdrop-filter: blur(10px);
       `;
 
-      const category = game.category === "1win bet" ? t.category1win : t.categoryOther;
+      const category =
+        game.category === "1win bet" ? t.category1win : t.categoryOther;
 
       gameCard.innerHTML = `
         <div style="
@@ -629,7 +741,7 @@ function showGamesInterface() {
         ">${game.name}</h3>
         
         <div style="
-          background: ${game.category === "1win bet" ? '#FF6B6B' : '#4ECDC4'};
+          background: ${game.category === "1win bet" ? "#FF6B6B" : "#4ECDC4"};
           color: white;
           padding: 5px 15px;
           border-radius: 15px;
@@ -639,20 +751,20 @@ function showGamesInterface() {
       `;
 
       // Add hover effects
-      gameCard.addEventListener('mouseenter', () => {
-        gameCard.style.transform = 'translateY(-5px) scale(1.02)';
-        gameCard.style.boxShadow = '0 15px 30px rgba(0,0,0,0.4)';
-        gameCard.style.background = 'rgba(255,255,255,0.15)';
+      gameCard.addEventListener("mouseenter", () => {
+        gameCard.style.transform = "translateY(-5px) scale(1.02)";
+        gameCard.style.boxShadow = "0 15px 30px rgba(0,0,0,0.4)";
+        gameCard.style.background = "rgba(255,255,255,0.15)";
       });
 
-      gameCard.addEventListener('mouseleave', () => {
-        gameCard.style.transform = 'translateY(0) scale(1)';
-        gameCard.style.boxShadow = 'none';
-        gameCard.style.background = 'rgba(255,255,255,0.1)';
+      gameCard.addEventListener("mouseleave", () => {
+        gameCard.style.transform = "translateY(0) scale(1)";
+        gameCard.style.boxShadow = "none";
+        gameCard.style.background = "rgba(255,255,255,0.1)";
       });
 
       // Add click handler
-      gameCard.addEventListener('click', () => {
+      gameCard.addEventListener("click", () => {
         if (licenseValidated) {
           window.location.href = getGameUrlWithParams(game.url);
         }
@@ -671,7 +783,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // STEP 1: IMMEDIATELY HIDE ANY EXISTING CONTENT
   console.log("🔒 === HIDING ALL CONTENT IMMEDIATELY ===");
-  document.body.style.display = 'none';
+  document.body.style.display = "none";
 
   const lang = getParam("lang");
   const lk = getParam("lk");
@@ -679,7 +791,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Step 2: Language check
   if (!lang) {
     console.log("❌ No language parameter - redirecting");
-    document.body.style.display = 'block';
+    document.body.style.display = "block";
     setTimeout(() => {
       if (lk) {
         window.location.href = "https://t.me/" + lk;
@@ -694,14 +806,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Step 3: Show validation screen
-  document.body.style.display = 'block';
+  document.body.style.display = "block";
   showValidationScreen(lang);
 
   // Step 4: CRITICAL - Validate license
   console.log("🔐 === STARTING MANDATORY LICENSE VALIDATION ===");
-  
+
   const licenseValid = await validateUserLicense();
-  
+
   if (!licenseValid) {
     console.log("🚫 🚫 🚫 LICENSE VALIDATION FAILED - WEBAPP LOCKED 🚫 🚫 🚫");
     // showExpiredScreen already called in validateUserLicense
@@ -709,9 +821,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   console.log("✅ ✅ ✅ LICENSE VALIDATED - SHOWING GAMES ✅ ✅ ✅");
-  
+
   // Step 5: Only show games if license is valid
   showGamesInterface();
-  
+
   console.log("🎉 === SECURE WEBAPP FULLY LOADED ===");
 });
