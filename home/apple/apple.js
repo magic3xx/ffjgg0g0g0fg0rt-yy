@@ -1,6 +1,7 @@
 class AppleCassa {
     constructor() {
         this.language = this.getLanguageFromURL();
+        this.lastPredictionIndex = null; // Add this line to store the last index
         this.translations = {
             fr: {
                 title: "Apple Cassa",
@@ -181,7 +182,15 @@ class AppleCassa {
                 }, 4000);
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
-                const randomIndex = Math.floor(Math.random() * circles.length);
+                let randomIndex;
+            
+                // Use a do-while loop to guarantee the new index is different from the last one
+                do {
+                    randomIndex = Math.floor(Math.random() * circles.length);
+                } while (randomIndex === this.lastPredictionIndex);
+            
+                this.lastPredictionIndex = randomIndex; // Remember this choice for the next round
+            
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
                 image.src = "https://i.ibb.co/hBdQrHp/IMG-20241125-133222-422.jpg";
@@ -203,6 +212,7 @@ class AppleCassa {
     handleReset() {
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
+        this.lastPredictionIndex = null;
         circleContainer.innerHTML = `
             <div class="circle-row">
                 <div class="circle" id="circle1"></div>
