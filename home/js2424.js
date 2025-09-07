@@ -10,7 +10,7 @@ const translations = {
     'noLangError': "Veuillez configurer la langue dans le bot avant de continuer",
     'category1win': "1win bet",
     'categoryOther': "Autres Bets",
-    'licenseExpired': "🔒 Votre licence a expiré",
+    'licenseExpired': "🔒 Votre Licence a Expiré",
     'licenseExpiredMessage': "Votre accès Premium a expiré. Contactez l'administrateur pour renouveler votre licence.",
     'contactAdmin': "Contacter l'administrateur",
     'validatingLicense': "Vérification de votre licence...",
@@ -158,14 +158,14 @@ function parseProfileFromUrl() {
   
   if (i && us && lk) {
     const telegramUrl = "https://t.me/" + lk;
-    profileBtn.setAttribute("href", telegramUrl);
-    profileName.textContent = us;
-    profileId.style.display = 'none';
-    profileInfo.style.display = 'block';
+    if (profileBtn) profileBtn.setAttribute("href", telegramUrl);
+    if (profileName) profileName.textContent = us;
+    if (profileId) profileId.style.display = 'none';
+    if (profileInfo) profileInfo.style.display = 'block';
   }
 }
 
-// ✅ FIXED: Real-time license validation with comprehensive debugging
+// ✅ CRITICAL: Real-time license validation with your bot database
 async function validateUserLicense() {
   const telegramId = getParam('i');
   const lang = getParam("lang") || 'fr';
@@ -176,7 +176,6 @@ async function validateUserLicense() {
   console.log('📋 Full URL:', window.location.href);
   console.log('🆔 Telegram ID from URL:', telegramId);
   console.log('🌍 Language:', lang);
-  console.log('📋 All URL params:', Object.fromEntries(new URLSearchParams(window.location.search)));
   
   // Check if telegram ID is valid
   if (!telegramId || telegramId === '' || telegramId === 'null' || telegramId === 'undefined') {
@@ -200,13 +199,14 @@ async function validateUserLicense() {
   }
   
   try {
-    console.log('📡 === MAKING API CALL ===');
+    console.log('📡 === MAKING API CALL TO YOUR BOT SYSTEM ===');
     console.log('🎯 API Endpoint: /api/check-license-validity');
-    console.log('📤 Sending telegram_id:', telegramIdInt, 'type:', typeof telegramIdInt);
+    console.log('📤 Sending telegram_id:', telegramIdInt);
     
     const requestBody = { telegram_id: telegramIdInt };
     console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
     
+    // CRITICAL: This connects to your bot's license checking system
     const response = await fetch('/api/check-license-validity', {
       method: 'POST',
       headers: {
@@ -221,20 +221,19 @@ async function validateUserLicense() {
     
     if (!response.ok) {
       console.error('❌ API response not ok:', response.status);
-      throw new Error(\`API returned \${response.status}: \${response.statusText}\`);
+      throw new Error(`API returned ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
     console.log('📊 Response data:', JSON.stringify(data, null, 2));
     
-    // CRITICAL DECISION LOGIC
+    // CRITICAL DECISION LOGIC - CONNECTS TO YOUR BOT DATABASE
     console.log('🎯 === LICENSE VALIDATION DECISION ===');
     console.log('✅ data.success:', data.success);
     console.log('✅ data.valid:', data.valid);
     console.log('❌ data.expired:', data.expired);
     console.log('📅 data.expires_at:', data.expires_at);
     console.log('💬 data.message:', data.message);
-    console.log('⚠️  data.error:', data.error);
     
     // Check if license is valid - STRICT validation
     if (data.success === true && data.valid === true) {
@@ -254,24 +253,24 @@ async function validateUserLicense() {
     console.error('💥 === LICENSE VALIDATION ERROR ===');
     console.error('Error details:', error);
     console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
     
     showExpiredScreen(t.licenseError, "Could not validate license: " + error.message, lang);
     return false;
   }
 }
 
-// Show expired license screen - COMPLETELY BLOCKS webapp
+// ✅ CRITICAL: Show expired license screen - COMPLETELY BLOCKS webapp
 function showExpiredScreen(title, message, lang) {
   const t = translations[lang] || translations.fr;
+  const lk = getParam('lk');
   
   console.log('🔒 === SHOWING EXPIRED SCREEN ===');
   console.log('🚫 Title:', title);
   console.log('💬 Message:', message);
   console.log('🌍 Language:', lang);
   
-  // COMPLETELY REPLACE PAGE CONTENT
-  document.body.innerHTML = \`
+  // COMPLETELY REPLACE PAGE CONTENT - NO ACCESS TO GAMES
+  document.body.innerHTML = `
     <div style="
       display: flex; 
       flex-direction: column; 
@@ -314,7 +313,7 @@ function showExpiredScreen(title, message, lang) {
           font-size: 28px; 
           font-weight: bold;
           text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        ">\${title}</h1>
+        ">${title}</h1>
         
         <p style="
           margin: 0 0 30px 0; 
@@ -322,7 +321,7 @@ function showExpiredScreen(title, message, lang) {
           line-height: 1.6; 
           opacity: 0.95;
           text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        ">\${message}</p>
+        ">${message}</p>
         
         <div style="
           margin-bottom: 30px;
@@ -339,7 +338,7 @@ function showExpiredScreen(title, message, lang) {
           </ul>
         </div>
         
-        <a href="https://t.me/admin" style="
+        <a href="https://t.me/${lk || 'admin'}" style="
           display: inline-block;
           background: linear-gradient(45deg, #FF6B6B, #FF8E53);
           color: white;
@@ -359,7 +358,7 @@ function showExpiredScreen(title, message, lang) {
           this.style.transform='translateY(0) scale(1)';
           this.style.boxShadow='0 10px 20px rgba(255,107,107,0.4)';
         ">
-          📞 \${t.contactAdmin}
+          📞 ${t.contactAdmin}
         </a>
         
         <div style="
@@ -400,7 +399,7 @@ function showExpiredScreen(title, message, lang) {
         }
       </style>
     </div>
-  \`;
+  `;
   
   // NUCLEAR OPTION: Prevent any further JavaScript execution
   console.log('🚫 DISABLING ALL FURTHER JAVASCRIPT EXECUTION');
@@ -567,19 +566,19 @@ function populateGames() {
     
     const category = game.category === "1win bet" ? t.category1win : t.categoryOther;
     
-    gameCard.innerHTML = \`
-      <div class="game-image" style="background-image: url('\${game.image}');">
+    gameCard.innerHTML = `
+      <div class="game-image" style="background-image: url('${game.image}');">
         <div class="game-overlay">
-          <div class="play-btn" aria-label="Jouer à \${game.name}">
+          <div class="play-btn" aria-label="Jouer à ${game.name}">
             <i class="fas fa-play"></i>
           </div>
         </div>
       </div>
       <div class="game-info">
-        <div class="game-name">\${game.name}</div>
-        <div class="game-category">\${category}</div>
+        <div class="game-name">${game.name}</div>
+        <div class="game-category">${category}</div>
       </div>
-    \`;
+    `;
     
     gamesGrid.appendChild(gameCard);
   });
@@ -619,8 +618,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('✅ Basic setup completed');
   
   // Step 3: ⚡ CRITICAL - Validate license BEFORE showing anything
-  console.log('📋 Step 3: LICENSE VALIDATION - THIS IS THE CRITICAL STEP');
-  console.log('🔐 === STARTING LICENSE VALIDATION ===');
+  console.log('📋 Step 3: LICENSE VALIDATION - CONNECTS TO YOUR BOT DATABASE');
+  console.log('🔐 === STARTING REAL-TIME LICENSE VALIDATION ===');
   
   const licenseValid = await validateUserLicense();
   
