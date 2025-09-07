@@ -194,8 +194,24 @@ class LuckyJetPredictor {
     }
 
     generateCoefficient() {
-        const { min, max } = this.config.coefficientRange;
-        return (Math.random() * (max - min) + min).toFixed(2);
+        const roll = Math.random(); // A single random number from 0 to 1 to decide the outcome
+    
+        // --- You can easily change these probabilities ---
+        
+        // 70% chance for a low coefficient (1.00x - 1.99x)
+        if (roll < 0.70) { 
+            return (Math.random() * (1.99 - 1.00) + 1.00).toFixed(2);
+        } 
+        // 25% chance for a medium coefficient (2.00x - 4.99x)
+        // This runs if roll is between 0.70 and 0.95 (0.70 + 0.25)
+        else if (roll < 0.95) { 
+            return (Math.random() * (4.99 - 2.00) + 2.00).toFixed(2);
+        } 
+        // 5% chance for a high coefficient (5.00x - 10.00x)
+        // This runs for the remaining 5% of cases
+        else { 
+            return (Math.random() * (10.00 - 5.00) + 5.00).toFixed(2);
+        }
     }
 
     handleNextRound() {
@@ -213,10 +229,10 @@ class LuckyJetPredictor {
         const now = new Date();
 
         if (this.appState.lastDisplayedTime) {
-            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 5);
+            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 2);
         } else {
             this.appState.lastDisplayedTime = new Date(now.getTime());
-            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 5);
+            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 2);
         }
 
         this.triggerPrediction();
