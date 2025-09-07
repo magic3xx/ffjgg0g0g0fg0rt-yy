@@ -1,6 +1,7 @@
 class AppleCassa {
     constructor() {
         this.language = this.getLanguageFromURL();
+        this.predictionBag = []; // <-- ADDED: Holds the shuffled predictions
         
         this.translations = {
             fr: {
@@ -157,28 +158,20 @@ class AppleCassa {
         return true;
     }
 
-    // <-- ADDED: New helper function for weighted random
-    _getWeightedRandomIndex() {
-        const roll = Math.random(); // Get a random number between 0.0 and 1.0
-
-        // Customize your probabilities here. They must add up to 1.0
-        // - Circles 1 (index 0): 10% chance
-        // - Circles 2 (index 1): 20% chance
-        // - Circles 3 (index 2): 40% chance
-        // - Circles 4 (index 3): 20% chance
-        // - Circles 5 (index 4): 10% chance
-
-        if (roll < 0.10) {          // 10% of outcomes
-            return 0; // First circle
-        } else if (roll < 0.30) {   // Next 20% (from 0.10 to 0.30)
-            return 1; // Second circle
-        } else if (roll < 0.70) {   // Next 40% (from 0.30 to 0.70)
-            return 2; // Middle circle
-        } else if (roll < 0.90) {   // Next 20% (from 0.70 to 0.90)
-            return 3; // Fourth circle
-        } else {                    // Final 10%
-            return 4; // Fifth circle
+    // <-- ADDED: New helper function to get prediction from the bag
+    _getNextPredictionIndex() {
+        // If the bag is empty, fill it with all possible outcomes and shuffle it
+        if (this.predictionBag.length === 0) {
+            this.predictionBag = [0, 1, 2, 3, 4]; // The 5 possible circle indices
+            
+            // Fisher-Yates shuffle algorithm for true randomness
+            for (let i = this.predictionBag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
+            }
         }
+        // Draw the next prediction from the bag
+        return this.predictionBag.pop();
     }
 
     handlePredict() {
@@ -206,9 +199,9 @@ class AppleCassa {
                 }, 4000);
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
-
-                // <-- MODIFIED: Use the new weighted random function
-                const randomIndex = this._getWeightedRandomIndex();
+                
+                // <-- MODIFIED: Use the new function instead of simple random
+                const randomIndex = this._getNextPredictionIndex();
 
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
@@ -229,6 +222,9 @@ class AppleCassa {
     }
 
     handleReset() {
+        // <-- ADDED: Clear the prediction bag on reset
+        this.predictionBag = [];
+
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
         circleContainer.innerHTML = `
