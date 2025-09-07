@@ -12,7 +12,7 @@ class LuckyJetPredictor {
                 predictionGenerated: "Prédiction générée!",
                 coefficient: "Coefficient",
                 loadingMessage: "Chargement en cours... Veuillez patienter...",
-                nextPrediction: "Prochaine prédiction",
+                nextPrediction: "CONTINUEZ CETTE FOIS",
                 errorMessage: "Désolé, une erreur s'est produite",
                 noLang: "Veuillez configurer la langue dans votre bot et réessayer"
             },
@@ -26,7 +26,7 @@ class LuckyJetPredictor {
                 predictionGenerated: "Prediction generated!",
                 coefficient: "Coefficient",
                 loadingMessage: "Loading... Please wait...",
-                nextPrediction: "Next prediction",
+                nextPrediction: "GO ON THIS TIME",
                 errorMessage: "Sorry, an error occurred",
                 noLang: "Please configure the language in your bot and try again"
             },
@@ -40,7 +40,7 @@ class LuckyJetPredictor {
                 predictionGenerated: "Прогноз сгенерирован!",
                 coefficient: "Коэффициент",
                 loadingMessage: "Загрузка... Пожалуйста, подождите...",
-                nextPrediction: "Следующий прогноз",
+                nextPrediction: "ДВИГАЙСЯ НА ЭТОТ РАЗ",
                 errorMessage: "Извините, произошла ошибка",
                 noLang: "Пожалуйста, настройте язык в вашем боте и попробуйте снова"
             },
@@ -54,7 +54,7 @@ class LuckyJetPredictor {
                 predictionGenerated: "تم إنشاء التنبؤ!",
                 coefficient: "المعامل",
                 loadingMessage: "جارٍ التحميل... الرجاء الانتظار...",
-                nextPrediction: "التنبؤ التالي",
+                nextPrediction: "ادخل علي ",
                 errorMessage: "عذرًا، حدث خطأ",
                 noLang: "يرجى تكوين اللغة في البوت الخاص بك وإعادة المحاولة"
             }
