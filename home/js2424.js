@@ -9,7 +9,15 @@ const translations = {
     'loadingText': "Chargement de votre jeu...",
     'noLangError': "Veuillez configurer la langue dans le bot avant de continuer",
     'category1win': "1win bet",
-    'categoryOther': "Autres Bets"
+    'categoryOther': "Autres Bets",
+    'licenseStatus': "Statut de la licence",
+    'timeRemaining': "Temps restant",
+    'validLicense': "Licence valide",
+    'expires': "Expire",
+    'licenseExpired': "Licence expirée",
+    'licenseInvalid': "Licence invalide",
+    'validatingLicense': "Validation de la licence...",
+    'warningExpiresSoon': "La licence expire bientôt!"
   },
   'en': {
     'pageTitle': "FOXBET",
@@ -21,7 +29,15 @@ const translations = {
     'loadingText': "Loading your game...",
     'noLangError': "Please configure the language in the bot before continuing",
     'category1win': "1win bet",
-    'categoryOther': "Other Bets"
+    'categoryOther': "Other Bets",
+    'licenseStatus': "License Status",
+    'timeRemaining': "Time Remaining",
+    'validLicense': "Valid License",
+    'expires': "Expires",
+    'licenseExpired': "License Expired",
+    'licenseInvalid': "License Invalid",
+    'validatingLicense': "Validating license...",
+    'warningExpiresSoon': "License expires soon!"
   },
   'ru': {
     'pageTitle': "FOXBET",
@@ -33,7 +49,15 @@ const translations = {
     'loadingText': "Загрузка вашей игры...",
     'noLangError': "Пожалуйста, настройте язык в боте перед продолжением",
     'category1win': "1win ставка",
-    'categoryOther': "Другие ставки"
+    'categoryOther': "Другие ставки",
+    'licenseStatus': "Статус лицензии",
+    'timeRemaining': "Время до истечения",
+    'validLicense': "Действующая лицензия",
+    'expires': "Истекает",
+    'licenseExpired': "Лицензия истекла",
+    'licenseInvalid': "Неверная лицензия",
+    'validatingLicense': "Проверка лицензии...",
+    'warningExpiresSoon': "Лицензия скоро истечет!"
   },
   'ar': {
     'pageTitle': "FOXBET",
@@ -45,7 +69,15 @@ const translations = {
     'loadingText': "جارٍ تحميل لعبتك...",
     'noLangError': "يرجى تهيئة اللغة في البوت قبل المتابعة",
     'category1win': "رهان 1win",
-    'categoryOther': "رهانات أخرى"
+    'categoryOther': "رهانات أخرى",
+    'licenseStatus': "حالة الترخيص",
+    'timeRemaining': "الوقت المتبقي",
+    'validLicense': "ترخيص صحيح",
+    'expires': "ينتهي في",
+    'licenseExpired': "انتهت صلاحية الترخيص",
+    'licenseInvalid': "ترخيص غير صحيح",
+    'validatingLicense': "جاري التحقق من الترخيص...",
+    'warningExpiresSoon': "الترخيص ينتهي قريباً!"
   }
 };
 
@@ -112,6 +144,10 @@ const gamesData = [
   }
 ];
 
+// Global variable to store license data and refresh interval
+let licenseData = null;
+let licenseRefreshInterval = null;
+
 function sanitizeInput(input) {
   const div = document.createElement("div");
   div.textContent = input;
@@ -128,6 +164,7 @@ function getGameUrlWithParams(gameUrl) {
   const username = getParam('us');
   const userId = getParam('i');
   const telegramLink = getParam('lk');
+  const licenseKey = getParam('key');
   const params = new URLSearchParams();
   
   if (lang) {
@@ -142,8 +179,223 @@ function getGameUrlWithParams(gameUrl) {
   if (telegramLink) {
     params.append('lk', telegramLink);
   }
+  if (licenseKey) {
+    params.append('key', licenseKey);
+  }
   
   return gameUrl + (params.toString() ? '?' + params.toString() : '');
+}
+
+// NEW FUNCTION: Validate license with your backend API
+async function validateLicense() {
+  const licenseKey = getParam('key');
+  const lang = getParam('lang') || 'en';
+  const userId = getParam('i');
+  
+  if (!licenseKey) {
+    console.error('No license key provided');
+    return null;
+  }
+
+  try {
+    // Replace this URL with your actual API endpoint
+    const response = await fetch(`https://telegram-bot-implementation-879.created.app/api/webapp/validate-license?key=${licenseKey}&lang=${lang}&userId=${userId}`);
+    const data = await response.json();
+    
+    if (data.valid) {
+      return data;
+    } else {
+      console.error('License validation failed:', data.error);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error validating license:', error);
+    return null;
+  }
+}
+
+// NEW FUNCTION: Create and display license status bar
+function createLicenseStatusBar() {
+  const language = getParam("lang") || 'en';
+  const translation = translations[language] || translations.en;
+  
+  // Create license status container
+  const licenseBar = document.createElement('div');
+  licenseBar.id = 'licenseStatusBar';
+  licenseBar.className = 'license-status-bar';
+  licenseBar.innerHTML = `
+    <div class="license-container">
+      <div class="license-info">
+        <div class="license-status" id="licenseStatusText">
+          <i class="fas fa-spinner fa-spin"></i> ${translation.validatingLicense}
+        </div>
+        <div class="license-time" id="licenseTimeText"></div>
+      </div>
+      <div class="license-warning" id="licenseWarning" style="display: none;"></div>
+    </div>
+  `;
+  
+  // Insert after header
+  const header = document.querySelector('header') || document.querySelector('.header');
+  if (header) {
+    header.insertAdjacentElement('afterend', licenseBar);
+  } else {
+    document.body.insertBefore(licenseBar, document.body.firstChild);
+  }
+  
+  // Add CSS styles
+  addLicenseStatusStyles();
+}
+
+// NEW FUNCTION: Add CSS styles for license status bar
+function addLicenseStatusStyles() {
+  const styles = `
+    .license-status-bar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    
+    .license-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .license-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .license-status {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .license-time {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .license-warning {
+      background: rgba(255, 193, 7, 0.2);
+      border: 1px solid rgba(255, 193, 7, 0.5);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .license-status.valid {
+      color: #28a745;
+    }
+    
+    .license-status.expired {
+      color: #dc3545;
+    }
+    
+    .license-status.invalid {
+      color: #ffc107;
+    }
+    
+    @media (max-width: 768px) {
+      .license-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .license-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+      }
+    }
+  `;
+  
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+}
+
+// NEW FUNCTION: Update license status display
+function updateLicenseStatusDisplay(data) {
+  const language = getParam("lang") || 'en';
+  const translation = translations[language] || translations.en;
+  
+  const statusElement = document.getElementById('licenseStatusText');
+  const timeElement = document.getElementById('licenseTimeText');
+  const warningElement = document.getElementById('licenseWarning');
+  
+  if (!statusElement || !timeElement) return;
+  
+  if (data && data.valid) {
+    // Valid license
+    statusElement.innerHTML = `<i class="fas fa-check-circle"></i> ${translation.validLicense}`;
+    statusElement.className = 'license-status valid';
+    
+    timeElement.textContent = `${translation.timeRemaining}: ${data.license.time_remaining_text}`;
+    
+    // Show warning if expires soon
+    if (data.warning && data.warning.type === 'expires_soon') {
+      warningElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${translation.warningExpiresSoon}`;
+      warningElement.style.display = 'block';
+    } else {
+      warningElement.style.display = 'none';
+    }
+    
+    licenseData = data;
+  } else {
+    // Invalid or expired license
+    statusElement.innerHTML = `<i class="fas fa-times-circle"></i> ${translation.licenseInvalid}`;
+    statusElement.className = 'license-status invalid';
+    
+    timeElement.textContent = '';
+    warningElement.style.display = 'none';
+    
+    // Redirect back to bot after 5 seconds
+    setTimeout(() => {
+      const telegramLink = getParam('lk');
+      if (telegramLink) {
+        window.location.href = `https://t.me/${telegramLink}`;
+      }
+    }, 5000);
+  }
+}
+
+// NEW FUNCTION: Start license validation and periodic refresh
+async function initializeLicenseTracking() {
+  // Create the license status bar
+  createLicenseStatusBar();
+  
+  // Initial validation
+  const data = await validateLicense();
+  updateLicenseStatusDisplay(data);
+  
+  // Set up periodic refresh every 30 seconds
+  if (licenseRefreshInterval) {
+    clearInterval(licenseRefreshInterval);
+  }
+  
+  licenseRefreshInterval = setInterval(async () => {
+    const refreshedData = await validateLicense();
+    updateLicenseStatusDisplay(refreshedData);
+  }, 30000); // 30 seconds
 }
 
 function parseProfileFromUrl() {
@@ -159,7 +411,7 @@ function parseProfileFromUrl() {
     const telegramUrl = "https://t.me/" + telegramLink;
     profileBtn.setAttribute("href", telegramUrl);
     profileName.textContent = username;
-    profileId.style.display = 'none'; // Hides the user ID display
+    profileId.style.display = 'none';
     profileInfo.style.display = 'block';
   }
 }
@@ -182,8 +434,9 @@ function applyTranslations(language) {
 function checkLanguageAndRedirect() {
   const language = getParam("lang");
   const telegramLink = getParam('lk');
+  const licenseKey = getParam('key');
   
-  if (!language) {
+  if (!language || !licenseKey) {
     const loadingOverlay = document.getElementById("loadingOverlay");
     const loadingText = document.getElementById("loadingText");
     
@@ -260,6 +513,15 @@ function hideLoading() {
 
 function handleGameClick(gameUrl, event) {
   event.preventDefault();
+  
+  // Check if license is valid before allowing game access
+  if (!licenseData || !licenseData.valid) {
+    const language = getParam("lang") || 'en';
+    const translation = translations[language] || translations.en;
+    alert(translation.licenseInvalid);
+    return;
+  }
+  
   showLoading();
   
   setTimeout(() => {
@@ -322,6 +584,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMode();
   populateGames();
   
+  // IMPORTANT: Initialize license tracking
+  initializeLicenseTracking();
+  
   // Mode toggle event
   const modeToggle = document.getElementById('modeToggle');
   modeToggle.addEventListener('click', event => {
@@ -360,4 +625,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   window.addEventListener("scroll", handleScroll);
+});
+
+// Clean up interval when page is unloaded
+window.addEventListener('beforeunload', () => {
+  if (licenseRefreshInterval) {
+    clearInterval(licenseRefreshInterval);
+  }
 });
