@@ -42,28 +42,31 @@ class AppleCassa {
             return;
         }
 
-        // --- ADDED --- Initialize the prediction bag.
-        this.predictionBag = [];
-
         this.updateLanguage(this.language);
         this.initializeApp();
     }
 
-    // --- NEW FUNCTION --- Manages the shuffled bag of predictions.
-    _getNextPredictionIndex() {
-        // Step 1: If the bag is empty, fill it with all possible positions and shuffle it.
-        if (this.predictionBag.length === 0) {
-            this.predictionBag = [0, 1, 2, 3, 4]; // The 5 possible circle indices
+    // --- NEW FUNCTION --- Returns a random index based on defined weights.
+    _getWeightedRandomIndex() {
+        const roll = Math.random(); // Get a random number between 0.0 and 1.0
 
-            // Fisher-Yates shuffle algorithm for true randomness
-            for (let i = this.predictionBag.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
-            }
+        // --- YOU CAN CHANGE THESE PROBABILITIES ---
+        // Current Distribution:
+        // - Position 1 & 5 (indices 0 & 4): 10% chance each
+        // - Position 2 & 4 (indices 1 & 3): 20% chance each
+        // - Position 3 (index 2): 40% chance
+
+        if (roll < 0.1) {         // 10% chance (0.0 to 0.1)
+            return 0; // First circle
+        } else if (roll < 0.3) {  // Next 20% chance (0.1 to 0.3)
+            return 1; // Second circle
+        } else if (roll < 0.7) {  // Next 40% chance (0.3 to 0.7)
+            return 2; // Middle circle
+        } else if (roll < 0.9) {  // Next 20% chance (0.7 to 0.9)
+            return 3; // Fourth circle
+        } else {                  // Last 10% chance (0.9 to 1.0)
+            return 4; // Fifth circle
         }
-
-        // Step 2: Draw the next prediction from the bag and return it.
-        return this.predictionBag.pop();
     }
 
     getLanguageFromURL() {
@@ -186,10 +189,10 @@ class AppleCassa {
                 }, 4000);
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
-                
-                // --- MODIFIED --- Use the new method to get a random index.
-                const randomIndex = this._getNextPredictionIndex();
 
+                // --- MODIFIED --- Use the new weighted method to get a random index.
+                const randomIndex = this._getWeightedRandomIndex();
+                
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
                 image.src = "https://i.ibb.co/hBdQrHp/IMG-20241125-133222-422.jpg";
@@ -209,9 +212,6 @@ class AppleCassa {
     }
 
     handleReset() {
-        // --- ADDED --- Clear the prediction bag when the game resets.
-        this.predictionBag = [];
-
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
         circleContainer.innerHTML = `
