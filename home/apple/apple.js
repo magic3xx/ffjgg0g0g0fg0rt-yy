@@ -1,7 +1,7 @@
 class AppleCassa {
     constructor() {
         this.language = this.getLanguageFromURL();
-        this.lastPredictionIndex = null; // Add this line to store the last index
+        
         this.translations = {
             fr: {
                 title: "Apple Cassa",
@@ -157,6 +157,30 @@ class AppleCassa {
         return true;
     }
 
+    // <-- ADDED: New helper function for weighted random
+    _getWeightedRandomIndex() {
+        const roll = Math.random(); // Get a random number between 0.0 and 1.0
+
+        // Customize your probabilities here. They must add up to 1.0
+        // - Circles 1 (index 0): 10% chance
+        // - Circles 2 (index 1): 20% chance
+        // - Circles 3 (index 2): 40% chance
+        // - Circles 4 (index 3): 20% chance
+        // - Circles 5 (index 4): 10% chance
+
+        if (roll < 0.10) {          // 10% of outcomes
+            return 0; // First circle
+        } else if (roll < 0.30) {   // Next 20% (from 0.10 to 0.30)
+            return 1; // Second circle
+        } else if (roll < 0.70) {   // Next 40% (from 0.30 to 0.70)
+            return 2; // Middle circle
+        } else if (roll < 0.90) {   // Next 20% (from 0.70 to 0.90)
+            return 3; // Fourth circle
+        } else {                    // Final 10%
+            return 4; // Fifth circle
+        }
+    }
+
     handlePredict() {
         const predictButton = document.getElementById('predictButton');
         const loading = document.getElementById('prediction-loading');
@@ -182,15 +206,10 @@ class AppleCassa {
                 }, 4000);
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
-                let randomIndex;
-            
-                // Use a do-while loop to guarantee the new index is different from the last one
-                do {
-                    randomIndex = Math.floor(Math.random() * circles.length);
-                } while (randomIndex === this.lastPredictionIndex);
-            
-                this.lastPredictionIndex = randomIndex; // Remember this choice for the next round
-            
+
+                // <-- MODIFIED: Use the new weighted random function
+                const randomIndex = this._getWeightedRandomIndex();
+
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
                 image.src = "https://i.ibb.co/hBdQrHp/IMG-20241125-133222-422.jpg";
@@ -212,7 +231,6 @@ class AppleCassa {
     handleReset() {
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
-        this.lastPredictionIndex = null;
         circleContainer.innerHTML = `
             <div class="circle-row">
                 <div class="circle" id="circle1"></div>
@@ -226,8 +244,3 @@ class AppleCassa {
         predictButton.disabled = false;
     }
 }
-
-// Initialisation de l'application
-document.addEventListener('DOMContentLoaded', () => {
-    new AppleCassa();
-});
