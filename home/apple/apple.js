@@ -1,8 +1,6 @@
 class AppleCassa {
     constructor() {
         this.language = this.getLanguageFromURL();
-        this.predictionBag = []; // <-- ADDED: Holds the shuffled predictions
-        
         this.translations = {
             fr: {
                 title: "Apple Cassa",
@@ -44,8 +42,28 @@ class AppleCassa {
             return;
         }
 
+        // --- ADDED --- Initialize the prediction bag.
+        this.predictionBag = [];
+
         this.updateLanguage(this.language);
         this.initializeApp();
+    }
+
+    // --- NEW FUNCTION --- Manages the shuffled bag of predictions.
+    _getNextPredictionIndex() {
+        // Step 1: If the bag is empty, fill it with all possible positions and shuffle it.
+        if (this.predictionBag.length === 0) {
+            this.predictionBag = [0, 1, 2, 3, 4]; // The 5 possible circle indices
+
+            // Fisher-Yates shuffle algorithm for true randomness
+            for (let i = this.predictionBag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
+            }
+        }
+
+        // Step 2: Draw the next prediction from the bag and return it.
+        return this.predictionBag.pop();
     }
 
     getLanguageFromURL() {
@@ -86,40 +104,25 @@ class AppleCassa {
     }
 
     initializeApp() {
-        // Afficher contenu après chargement
         setTimeout(() => {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').classList.add('visible');
         }, 3000);
-
-        // Bouton Prédictions
         document.getElementById('predictButton').addEventListener('click', () => {
-            if (navigator.vibrate) {
-                navigator.vibrate(200);
-            }
+            if (navigator.vibrate) navigator.vibrate(200);
             this.handlePredict();
         });
-
-        // Bouton Réinitialiser
         document.getElementById('resetButton').addEventListener('click', () => {
-            if (navigator.vibrate) {
-                navigator.vibrate(200);
-            }
+            if (navigator.vibrate) navigator.vibrate(200);
             this.handleReset();
         });
-
-        // Bouton Retour
         document.getElementById('backButton').addEventListener('click', () => {
-            if (navigator.vibrate) {
-                navigator.vibrate(200);
-            }
+            if (navigator.vibrate) navigator.vibrate(200);
             if (window.history.length > 1) {
                 window.history.back();
             } else {
                 window.location.href = "https://t.me/PREDBOX2ROBOT?start=user22476018";
-                setTimeout(() => {
-                    window.close();
-                }, 500);
+                setTimeout(() => window.close(), 500);
             }
         });
     }
@@ -158,22 +161,6 @@ class AppleCassa {
         return true;
     }
 
-    // <-- ADDED: New helper function to get prediction from the bag
-    _getNextPredictionIndex() {
-        // If the bag is empty, fill it with all possible outcomes and shuffle it
-        if (this.predictionBag.length === 0) {
-            this.predictionBag = [0, 1, 2, 3, 4]; // The 5 possible circle indices
-            
-            // Fisher-Yates shuffle algorithm for true randomness
-            for (let i = this.predictionBag.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
-            }
-        }
-        // Draw the next prediction from the bag
-        return this.predictionBag.pop();
-    }
-
     handlePredict() {
         const predictButton = document.getElementById('predictButton');
         const loading = document.getElementById('prediction-loading');
@@ -200,7 +187,7 @@ class AppleCassa {
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
                 
-                // <-- MODIFIED: Use the new function instead of simple random
+                // --- MODIFIED --- Use the new method to get a random index.
                 const randomIndex = this._getNextPredictionIndex();
 
                 const randomCircle = circles[randomIndex];
@@ -222,7 +209,7 @@ class AppleCassa {
     }
 
     handleReset() {
-        // <-- ADDED: Clear the prediction bag on reset
+        // --- ADDED --- Clear the prediction bag when the game resets.
         this.predictionBag = [];
 
         const circleContainer = document.getElementById('circleContainer');
@@ -240,3 +227,8 @@ class AppleCassa {
         predictButton.disabled = false;
     }
 }
+
+// Initialisation de l'application
+document.addEventListener('DOMContentLoaded', () => {
+    new AppleCassa();
+});
