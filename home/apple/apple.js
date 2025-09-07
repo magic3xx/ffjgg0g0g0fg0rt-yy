@@ -41,14 +41,12 @@ class AppleCassa {
             return;
         }
 
-        // --- NEW --- This will hold the state for the "hard" random part (Row 5+).
         this.predictionBag = [];
-
         this.updateLanguage(this.language);
         this.initializeApp();
     }
 
-    // --- NEW HELPER 1 --- For the hard part of the game (Row 5 and beyond).
+    // --- NEW HELPER 1 --- For the truly random part of the game (Row 5+).
     _getNextFromShuffledBag() {
         if (this.predictionBag.length === 0) {
             this.predictionBag = [0, 1, 2, 3, 4];
@@ -60,49 +58,45 @@ class AppleCassa {
         return this.predictionBag.pop();
     }
 
-    // --- NEW CORE LOGIC FUNCTION --- This implements YOUR specific rules.
-    _getPatternedPrediction(rowNumber) {
-        let choices;
-        const roll = Math.random(); // A random number for weighted choices.
+    // --- NEW CORE LOGIC: "The Winning Path" ---
+    _getWinningPrediction(rowNumber) {
+        let bestChoices;
+        let sometimeChoices;
+        const roll = Math.random();
 
         switch (rowNumber) {
-            case 1:
-                // Rule: "best 1,2,4,5" -> The prediction will be one of these four.
-                console.log("Row 1: Predicting one of [1, 2, 4, 5]");
-                choices = [0, 1, 3, 4];
-                return choices[Math.floor(Math.random() * choices.length)];
+            case 1: // Winning Zone: Guaranteed win
+                console.log("Row 1 (Winning Zone): GUARANTEED choice from [1, 2, 4, 5]");
+                bestChoices = [0, 1, 3, 4]; // The 'best' spots are 1, 2, 4, 5
+                return bestChoices[Math.floor(Math.random() * bestChoices.length)];
 
-            case 2:
-                // Rule: "best 1,4,5 and sometime 3" -> High chance for 1,4,5, low chance for 3.
-                console.log("Row 2: High chance for [1, 4, 5], low for [3]");
-                if (roll < 0.85) { // 85% chance for a "best" choice
-                    choices = [0, 3, 4];
-                    return choices[Math.floor(Math.random() * choices.length)];
-                } else { // 15% chance for the "sometime" choice
-                    return 2; // Index for position 3
+            case 2: // Winning Zone: Guaranteed win
+                console.log("Row 2 (Winning Zone): GUARANTEED choice from [1, 4, 5]");
+                bestChoices = [0, 3, 4]; // The 'best' spots are 1, 4, 5
+                return bestChoices[Math.floor(Math.random() * bestChoices.length)];
+
+            case 3: // Challenge Zone: High chance to win, small risk
+                console.log("Row 3 (Challenge Zone): High chance for [4, 5], small risk of [1, 2]");
+                bestChoices = [3, 4]; // Best are 4, 5
+                sometimeChoices = [0, 1]; // Sometime are 1, 2
+                if (roll < 0.85) { // 85% chance to get a "best" choice
+                    return bestChoices[Math.floor(Math.random() * bestChoices.length)];
+                } else {
+                    return sometimeChoices[Math.floor(Math.random() * sometimeChoices.length)];
                 }
 
-            case 3:
-                // Rule: "best 4,5 and sometime 2,1"
-                console.log("Row 3: High chance for [4, 5], low for [1, 2]");
-                if (roll < 0.80) { // 80% chance for a "best" choice
-                    return Math.random() < 0.5 ? 3 : 4; // Index 3 or 4
-                } else { // 20% chance for a "sometime" choice
-                    return Math.random() < 0.5 ? 0 : 1; // Index 0 or 1
-                }
-            
-            case 4:
-                // Rule: "best 1,3 and sometime 4,5"
-                console.log("Row 4: High chance for [1, 3], low for [4, 5]");
-                 if (roll < 0.75) { // 75% chance for a "best" choice
-                    return Math.random() < 0.5 ? 0 : 2; // Index 0 or 2
-                } else { // 25% chance for a "sometime" choice
-                    return Math.random() < 0.5 ? 3 : 4; // Index 3 or 4
+            case 4: // Challenge Zone: High chance to win, small risk
+                console.log("Row 4 (Challenge Zone): High chance for [1, 3], small risk of [4, 5]");
+                bestChoices = [0, 2]; // Best are 1, 3
+                sometimeChoices = [3, 4]; // Sometime are 4, 5
+                if (roll < 0.80) { // 80% chance to get a "best" choice
+                    return bestChoices[Math.floor(Math.random() * bestChoices.length)];
+                } else {
+                    return sometimeChoices[Math.floor(Math.random() * sometimeChoices.length)];
                 }
 
-            default:
-                // Rule: "fifth to the end... hard... everytime diffrent"
-                console.log(`Row ${rowNumber}: Hard mode. Truly random.`);
+            default: // Expert Zone: Truly random and hard
+                console.log(`Row ${rowNumber} (Expert Zone): Truly random.`);
                 return this._getNextFromShuffledBag();
         }
     }
@@ -198,7 +192,6 @@ class AppleCassa {
             const currentRow = circleContainer.firstElementChild;
             const t = this.translations[this.language] || this.translations.fr;
             
-            // Get the current row number to determine which rule to apply.
             const currentRowNumber = rows.length;
 
             if (rows.length >= 11) {
@@ -210,8 +203,8 @@ class AppleCassa {
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
                 
-                // --- MODIFIED --- Get the prediction using your custom pattern logic.
-                const randomIndex = this._getPatternedPrediction(currentRowNumber);
+                // --- MODIFIED --- Use the new "Winning Path" logic.
+                const randomIndex = this._getWinningPrediction(currentRowNumber);
 
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
@@ -231,9 +224,7 @@ class AppleCassa {
     }
 
     handleReset() {
-        // --- MODIFIED --- Reset the bag so the "hard mode" sequence is fresh.
         this.predictionBag = [];
-
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
         circleContainer.innerHTML = `
@@ -250,7 +241,6 @@ class AppleCassa {
     }
 }
 
-// Initialisation de l'application
 document.addEventListener('DOMContentLoaded', () => {
     new AppleCassa();
 });
