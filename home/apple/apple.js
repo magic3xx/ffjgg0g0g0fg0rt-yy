@@ -32,7 +32,7 @@ class AppleCassa {
                 reset: "إعادة تعيين",
                 back: "رجوع",
                 limitReached: "تم الوصول إلى الحد! انقر على إعادة تعيين",
-                noLang: "يرجى تكوين اللغة في البوت الخاص بك وإعادة المحاولة"
+                noLang: "يرجى تكوين اللغة в البوت الخاص بك وإعادة المحاولة"
             }
         };
 
@@ -41,48 +41,44 @@ class AppleCassa {
             return;
         }
 
-        // --- NEW --- Initialize a "shuffled bag" for the hardest difficulty levels.
-        this.predictionBag = [];
-
         this.updateLanguage(this.language);
         this.initializeApp();
     }
 
-    // --- NEW HELPER FUNCTION 1 ---
-    // This is the core logic for the "Very Hard" difficulty (rows 4+).
-    // It ensures fair randomness without immediate repeats.
-    _getNextFromShuffledBag() {
-        if (this.predictionBag.length === 0) {
-            this.predictionBag = [0, 1, 2, 3, 4]; // The 5 possible circle indices
-            for (let i = this.predictionBag.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
+    // --- NEW CORE LOGIC FUNCTION ---
+    // This function calculates the prediction based on the current row number.
+    _getPredictionForRow(rowNumber) {
+        let weights;
+
+        // The probabilities change depending on the row number.
+        if (rowNumber === 1) {
+            // Row 1 (Very Easy): High chance for the middle circle.
+            // [pos1, pos2, pos3 (middle), pos4, pos5]
+            weights = [0.05, 0.10, 0.70, 0.10, 0.05]; // 70% chance for middle
+        } else if (rowNumber === 2) {
+            // Row 2 (Easy): Middle is still likely, but less so.
+            weights = [0.10, 0.20, 0.40, 0.20, 0.10]; // 40% chance for middle
+        } else if (rowNumber === 3) {
+            // Row 3 (Medium): The odds are spreading out.
+            weights = [0.15, 0.20, 0.30, 0.20, 0.15]; // 30% chance for middle
+        } else {
+            // Row 4 and beyond (Hard): The game is completely fair.
+            weights = [0.20, 0.20, 0.20, 0.20, 0.20]; // 20% chance for each
+        }
+
+        // Helper to pick an index based on the weights array.
+        const roll = Math.random();
+        let cumulativeProbability = 0;
+        for (let i = 0; i < weights.length; i++) {
+            cumulativeProbability += weights[i];
+            if (roll < cumulativeProbability) {
+                console.log(`Row: ${rowNumber}, Difficulty: ${rowNumber > 3 ? 'Hard' : 'Easy/Medium'}, Choice: ${i}`);
+                return i; // Return the chosen circle index
             }
         }
-        return this.predictionBag.pop();
-    }
-
-    // --- NEW HELPER FUNCTION 2 ---
-    // This is the main controller for the game's difficulty.
-    // It returns a prediction index based on the current row number.
-    _getPredictionForRow(rowNumber) {
-        switch (rowNumber) {
-            case 1: // First prediction (EASY)
-                console.log("Difficulty: Easy. Predicting middle.");
-                return 2; // Always the middle circle (index 2)
-
-            case 2: // Second prediction (MEDIUM)
-                console.log("Difficulty: Medium. Predicting adjacent to middle.");
-                return Math.random() < 0.5 ? 1 : 3; // Either index 1 or 3
-
-            case 3: // Third prediction (HARD)
-                console.log("Difficulty: Hard. Predicting edges.");
-                return Math.random() < 0.5 ? 0 : 4; // Either index 0 or 4
-
-            default: // Rows 4 and up (VERY HARD / RANDOM)
-                console.log(`Difficulty: Very Hard (Row ${rowNumber}). Using shuffled bag.`);
-                return this._getNextFromShuffledBag();
-        }
+        
+        // Fallback for any floating point inaccuracies
+        return weights.length - 1;
     }
 
     getLanguageFromURL() {
@@ -176,8 +172,8 @@ class AppleCassa {
             const currentRow = circleContainer.firstElementChild;
             const t = this.translations[this.language] || this.translations.fr;
             
-            // --- MODIFIED --- Get the current row number to determine difficulty.
-            const currentRowNumber = rows.length; // This will be 1 for the first prediction, 2 for the second, etc.
+            // --- MODIFIED --- Get the current row number to determine the difficulty.
+            const currentRowNumber = rows.length; 
 
             if (rows.length >= 11) {
                 const alertBox = document.getElementById('alertBox');
@@ -188,7 +184,7 @@ class AppleCassa {
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
                 
-                // --- MODIFIED --- Get the prediction using the new difficulty logic.
+                // --- MODIFIED --- Get the prediction using the new "Dynamic Luck" logic.
                 const randomIndex = this._getPredictionForRow(currentRowNumber);
 
                 const randomCircle = circles[randomIndex];
@@ -209,9 +205,6 @@ class AppleCassa {
     }
 
     handleReset() {
-        // --- MODIFIED --- We must also reset the prediction bag.
-        this.predictionBag = [];
-
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
         circleContainer.innerHTML = `
