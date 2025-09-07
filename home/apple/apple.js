@@ -41,65 +41,74 @@ class AppleCassa {
             return;
         }
 
-        this.predictionBag = [];
+        // --- AI MEMORY ---
+        // This is the core of the new system.
+        this.lastPredictionIndex = null;
+
         this.updateLanguage(this.language);
         this.initializeApp();
     }
 
-    // --- NEW HELPER 1 --- For the truly random part of the game (Row 5+).
-    _getNextFromShuffledBag() {
-        if (this.predictionBag.length === 0) {
-            this.predictionBag = [0, 1, 2, 3, 4];
-            for (let i = this.predictionBag.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [this.predictionBag[i], this.predictionBag[j]] = [this.predictionBag[j], this.predictionBag[i]];
-            }
+    // --- NEW CORE LOGIC: The "Smart AI Opponent" ---
+    _getSmartPrediction() {
+        // --- Base Case: First prediction ---
+        // If the AI has no memory, its first move is truly random.
+        if (this.lastPredictionIndex === null) {
+            const firstChoice = Math.floor(Math.random() * 5);
+            console.log(`AI Start: No memory, picking randomly -> ${firstChoice + 1}`);
+            this.lastPredictionIndex = firstChoice; // Now the AI has a memory.
+            return firstChoice;
         }
-        return this.predictionBag.pop();
-    }
 
-    // --- NEW CORE LOGIC: "The Winning Path" ---
-    _getWinningPrediction(rowNumber) {
-        let bestChoices;
-        let sometimeChoices;
+        // --- AI's Intelligent Decision Making ---
+        let allPossibleChoices = [0, 1, 2, 3, 4];
+
+        // Rule #1: NEVER repeat the last move.
+        let nonRepeatingChoices = allPossibleChoices.filter(index => index !== this.lastPredictionIndex);
+        
         const roll = Math.random();
+        let nextChoice;
 
-        switch (rowNumber) {
-            case 1: // Winning Zone: Guaranteed win
-                console.log("Row 1 (Winning Zone): GUARANTEED choice from [1, 2, 4, 5]");
-                bestChoices = [0, 1, 3, 4]; // The 'best' spots are 1, 2, 4, 5
-                return bestChoices[Math.floor(Math.random() * bestChoices.length)];
+        // --- AI Moods ---
+        // 80% chance for a "Tricky Jump" to a non-adjacent spot.
+        if (roll < 0.80) {
+            const last = this.lastPredictionIndex;
+            const neighbors = [last - 1, last + 1];
+            
+            // Filter out the neighbors to find "far away" spots.
+            let farChoices = nonRepeatingChoices.filter(index => !neighbors.includes(index));
 
-            case 2: // Winning Zone: Guaranteed win
-                console.log("Row 2 (Winning Zone): GUARANTEED choice from [1, 4, 5]");
-                bestChoices = [0, 3, 4]; // The 'best' spots are 1, 4, 5
-                return bestChoices[Math.floor(Math.random() * bestChoices.length)];
+            // If there are no far choices (e.g., last pick was 2, non-repeating are 0,1,3,4, neighbors are 1,3),
+            // then just pick from any non-repeating choice to avoid errors.
+            if (farChoices.length === 0) {
+                farChoices = nonRepeatingChoices;
+            }
+            
+            nextChoice = farChoices[Math.floor(Math.random() * farChoices.length)];
+            console.log(`AI Mood: Tricky Jump. Last was ${last + 1}. Jumping to -> ${nextChoice + 1}`);
 
-            case 3: // Challenge Zone: High chance to win, small risk
-                console.log("Row 3 (Challenge Zone): High chance for [4, 5], small risk of [1, 2]");
-                bestChoices = [3, 4]; // Best are 4, 5
-                sometimeChoices = [0, 1]; // Sometime are 1, 2
-                if (roll < 0.85) { // 85% chance to get a "best" choice
-                    return bestChoices[Math.floor(Math.random() * bestChoices.length)];
-                } else {
-                    return sometimeChoices[Math.floor(Math.random() * sometimeChoices.length)];
-                }
+        } 
+        // 20% chance for an "Obvious Move" to an adjacent spot.
+        else {
+            const last = this.lastPredictionIndex;
+            
+            // Find the direct neighbors.
+            let neighborChoices = nonRepeatingChoices.filter(index => index === last - 1 || index === last + 1);
 
-            case 4: // Challenge Zone: High chance to win, small risk
-                console.log("Row 4 (Challenge Zone): High chance for [1, 3], small risk of [4, 5]");
-                bestChoices = [0, 2]; // Best are 1, 3
-                sometimeChoices = [3, 4]; // Sometime are 4, 5
-                if (roll < 0.80) { // 80% chance to get a "best" choice
-                    return bestChoices[Math.floor(Math.random() * bestChoices.length)];
-                } else {
-                    return sometimeChoices[Math.floor(Math.random() * sometimeChoices.length)];
-                }
-
-            default: // Expert Zone: Truly random and hard
-                console.log(`Row ${rowNumber} (Expert Zone): Truly random.`);
-                return this._getNextFromShuffledBag();
+            // If there are no valid neighbors, just pick from any non-repeating to avoid errors.
+            if (neighborChoices.length === 0) {
+                neighborChoices = nonRepeatingChoices;
+            }
+            
+            nextChoice = neighborChoices[Math.floor(Math.random() * neighborChoices.length)];
+            console.log(`AI Mood: Obvious Move. Last was ${last + 1}. Moving to -> ${nextChoice + 1}`);
         }
+
+        // --- CRITICAL: Update AI's memory with the new choice ---
+        this.lastPredictionIndex = nextChoice;
+        return nextChoice;
     }
+
 
     getLanguageFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -190,21 +199,14 @@ class AppleCassa {
             const circleContainer = document.getElementById('circleContainer');
             const rows = circleContainer.querySelectorAll('.circle-row');
             const currentRow = circleContainer.firstElementChild;
-            const t = this.translations[this.language] || this.translations.fr;
             
-            const currentRowNumber = rows.length;
-
             if (rows.length >= 11) {
-                const alertBox = document.getElementById('alertBox');
-                alertBox.textContent = t.limitReached;
-                alertBox.style.display = 'block';
-                predictButton.disabled = true;
-                setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+                // Handle limit reached
             } else if (currentRow) {
                 const circles = currentRow.querySelectorAll('.circle');
                 
-                // --- MODIFIED --- Use the new "Winning Path" logic.
-                const randomIndex = this._getWinningPrediction(currentRowNumber);
+                // --- MODIFIED --- Use the new Smart AI to get a prediction.
+                const randomIndex = this._getSmartPrediction();
 
                 const randomCircle = circles[randomIndex];
                 const image = document.createElement('img');
@@ -224,7 +226,9 @@ class AppleCassa {
     }
 
     handleReset() {
-        this.predictionBag = [];
+        // --- CRITICAL: The AI must forget everything when the game resets. ---
+        this.lastPredictionIndex = null;
+
         const circleContainer = document.getElementById('circleContainer');
         const predictButton = document.getElementById('predictButton');
         circleContainer.innerHTML = `
