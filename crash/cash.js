@@ -205,12 +205,12 @@ class LuckyJetPredictor {
         // 25% chance for a medium coefficient (2.00x - 4.99x)
         // This runs if roll is between 0.70 and 0.95 (0.70 + 0.25)
         else if (roll < 0.95) { 
-            return (Math.random() * (4.99 - 2.00) + 2.00).toFixed(2);
+            return (Math.random() * (3.20 - 2.00) + 2.00).toFixed(2);
         } 
         // 5% chance for a high coefficient (5.00x - 10.00x)
         // This runs for the remaining 5% of cases
         else { 
-            return (Math.random() * (10.00 - 5.00) + 5.00).toFixed(2);
+            return (Math.random() * (8.00 - 5.00) + 5.00).toFixed(2);
         }
     }
 
@@ -229,10 +229,10 @@ class LuckyJetPredictor {
         const now = new Date();
 
         if (this.appState.lastDisplayedTime) {
-            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 2);
+            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 3);
         } else {
             this.appState.lastDisplayedTime = new Date(now.getTime());
-            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 2);
+            this.appState.lastDisplayedTime.setMinutes(this.appState.lastDisplayedTime.getMinutes() + 3);
         }
 
         this.triggerPrediction();
