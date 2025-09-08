@@ -44,70 +44,8 @@
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
     
-    /* License Status Bar Styles */
-    .license-status-bar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: fixed;
-        top: 81px; /* Below the top nav */
-        width: 100%;
-        z-index: 999;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-    }
-    
-    .license-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    
-    .license-info {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-    
-    .license-status {
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .license-time {
-        font-size: 14px;
-        opacity: 0.9;
-    }
-    
-    .license-warning {
-        background: rgba(255, 193, 7, 0.2);
-        border: 1px solid rgba(255, 193, 7, 0.5);
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 14px;
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .license-status.valid {
-        color: #28a745;
-    }
-    
-    .license-status.expired {
-        color: #dc3545;
-    }
-    
-    .license-status.invalid {
-        color: #ffc107;
-    }
+
+
 
     .brand-section {
         display: flex;
@@ -529,24 +467,7 @@
                 max-height: 50vw;
             }
             
-        /* License bar mobile adjustments */
-        .license-container {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-        }
-        
-        .license-info {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-            width: 100%;
-        }
-        
-        .license-status-bar {
-            top: 61px;
-            padding: 8px 15px;
-        }
+       
     }
      @media (max-width: 412px) {
          .top-nav {
@@ -657,19 +578,7 @@
             max-width: 350px;
         }
         
-        /* License status bar mobile specific */
-        .license-status-bar {
-            padding: 8px 15px;
-            top: 61px; /* Adjusted for smaller mobile nav */
-        }
         
-        .license-status {
-            font-size: 12px;
-        }
-        
-        .license-time {
-            font-size: 11px;
-        }
         
         @media (max-width: 412px) {
             .sidebar {
@@ -705,7 +614,7 @@
         </div>
     </header>
     
-    <!-- License Status Bar - Will be created dynamically by JavaScript -->
+    
     
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
@@ -748,3 +657,4 @@
     <script src="home/js2424.js"></script>
 </body>
 </html>
+
