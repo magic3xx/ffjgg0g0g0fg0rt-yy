@@ -18,6 +18,8 @@ const translations = {
     licenseInvalid: "Licence invalide",
     validatingLicense: "Validation de la licence...",
     warningExpiresSoon: "La licence expire bientôt!",
+    accessDenied: "Accès refusé - Licence invalide",
+    redirectingToBot: "Redirection vers le bot...",
   },
   en: {
     pageTitle: "FOXBET",
@@ -38,6 +40,8 @@ const translations = {
     licenseInvalid: "License Invalid",
     validatingLicense: "Validating license...",
     warningExpiresSoon: "License expires soon!",
+    accessDenied: "Access Denied - Invalid License",
+    redirectingToBot: "Redirecting to bot...",
   },
   ru: {
     pageTitle: "FOXBET",
@@ -58,6 +62,8 @@ const translations = {
     licenseInvalid: "Неверная лицензия",
     validatingLicense: "Проверка лицензии...",
     warningExpiresSoon: "Лицензия скоро истечет!",
+    accessDenied: "Доступ запрещен - Неверная лицензия",
+    redirectingToBot: "Перенаправление в бот...",
   },
   ar: {
     pageTitle: "FOXBET",
@@ -78,6 +84,8 @@ const translations = {
     licenseInvalid: "ترخيص غير صحيح",
     validatingLicense: "جاري التحقق من الترخيص...",
     warningExpiresSoon: "الترخيص ينتهي قريباً!",
+    accessDenied: "تم رفض الوصول - ترخيص غير صحيح",
+    redirectingToBot: "جاري التوجه إلى البوت...",
   },
 };
 
@@ -186,37 +194,54 @@ function getGameUrlWithParams(gameUrl) {
   return gameUrl + (params.toString() ? "?" + params.toString() : "");
 }
 
-// NEW FUNCTION: Validate license with your backend API
+// Updated license validation function with better error handling
 async function validateLicense() {
   const licenseKey = getParam("key");
   const lang = getParam("lang") || "en";
   const userId = getParam("i");
 
+  console.log("Validating license with params:", { licenseKey: licenseKey ? "***" + licenseKey.slice(-4) : "missing", lang, userId });
+
   if (!licenseKey) {
-    console.error("No license key provided");
-    return null;
+    console.error("No license key provided in URL parameters");
+    return { valid: false, error: "License key is required" };
   }
 
   try {
-    // Updated to use your actual deployed backend domain
-    const response = await fetch(
-      `https://telegram-bot-implementation-879.created.app/api/webapp/validate-license?key=${licenseKey}&lang=${lang}&userId=${userId}`,
-    );
+    const apiUrl = `https://telegram-bot-implementation-879.created.app/api/webapp/validate-license?key=${encodeURIComponent(licenseKey)}&lang=${encodeURIComponent(lang)}&userId=${encodeURIComponent(userId || "")}`;
+    console.log("Making API request to:", apiUrl);
+    
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    console.log("API Response status:", response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
+      return { valid: false, error: `API Error: ${response.status}` };
+    }
+    
     const data = await response.json();
+    console.log("License validation result:", data);
 
     if (data.valid) {
       return data;
     } else {
       console.error("License validation failed:", data.error);
-      return null;
+      return { valid: false, error: data.error || "License validation failed" };
     }
   } catch (error) {
     console.error("Error validating license:", error);
-    return null;
+    return { valid: false, error: `Network error: ${error.message}` };
   }
 }
 
-// NEW FUNCTION: Create and display license status bar
+// Create and display license status bar
 function createLicenseStatusBar() {
   const language = getParam("lang") || "en";
   const translation = translations[language] || translations.en;
@@ -237,9 +262,8 @@ function createLicenseStatusBar() {
     </div>
   `;
 
-  // Insert after header
-  const header =
-    document.querySelector("header") || document.querySelector(".header");
+  // Insert after header or at top of body
+  const header = document.querySelector("header") || document.querySelector(".top-nav");
   if (header) {
     header.insertAdjacentElement("afterend", licenseBar);
   } else {
@@ -250,7 +274,7 @@ function createLicenseStatusBar() {
   addLicenseStatusStyles();
 }
 
-// NEW FUNCTION: Add CSS styles for license status bar
+// Add CSS styles for license status bar
 function addLicenseStatusStyles() {
   const styles = `
     .license-status-bar {
@@ -258,10 +282,12 @@ function addLicenseStatusStyles() {
       color: white;
       padding: 12px 20px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      position: fixed;
+      top: 81px;
+      width: 100%;
+      z-index: 999;
       backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
     }
     
     .license-container {
@@ -315,7 +341,16 @@ function addLicenseStatusStyles() {
       color: #ffc107;
     }
     
+    .license-status.error {
+      color: #dc3545;
+    }
+    
     @media (max-width: 768px) {
+      .license-status-bar {
+        top: 61px;
+        padding: 8px 15px;
+      }
+      
       .license-container {
         flex-direction: column;
         align-items: flex-start;
@@ -328,6 +363,14 @@ function addLicenseStatusStyles() {
         gap: 4px;
         width: 100%;
       }
+      
+      .license-status {
+        font-size: 12px;
+      }
+      
+      .license-time {
+        font-size: 11px;
+      }
     }
   `;
 
@@ -336,7 +379,7 @@ function addLicenseStatusStyles() {
   document.head.appendChild(styleSheet);
 }
 
-// NEW FUNCTION: Update license status display
+// Update license status display with better error handling
 function updateLicenseStatusDisplay(data) {
   const language = getParam("lang") || "en";
   const translation = translations[language] || translations.en;
@@ -363,26 +406,49 @@ function updateLicenseStatusDisplay(data) {
     }
 
     licenseData = data;
+    
+    // Hide games initially and show them after license validation
+    const gamesContainer = document.getElementById("gamesGrid");
+    if (gamesContainer) {
+      gamesContainer.style.display = "grid";
+    }
+    
   } else {
     // Invalid or expired license
-    statusElement.innerHTML = `<i class="fas fa-times-circle"></i> ${translation.licenseInvalid}`;
+    const errorMessage = data?.error || translation.licenseInvalid;
+    statusElement.innerHTML = `<i class="fas fa-times-circle"></i> ${translation.accessDenied}`;
     statusElement.className = "license-status invalid";
 
-    timeElement.textContent = "";
+    timeElement.textContent = errorMessage;
     warningElement.style.display = "none";
 
-    // Redirect back to bot after 5 seconds
+    // Hide games when license is invalid
+    const gamesContainer = document.getElementById("gamesGrid");
+    if (gamesContainer) {
+      gamesContainer.style.display = "none";
+    }
+    
+    // Show redirect message and redirect to bot after 5 seconds
     setTimeout(() => {
+      timeElement.textContent = translation.redirectingToBot;
       const telegramLink = getParam("lk");
-      if (telegramLink) {
-        window.location.href = `https://t.me/${telegramLink}`;
-      }
-    }, 5000);
+      
+      setTimeout(() => {
+        if (telegramLink) {
+          window.location.href = `https://t.me/${telegramLink}`;
+        } else {
+          // Fallback - try to close window or redirect to telegram
+          window.close();
+        }
+      }, 2000);
+    }, 3000);
   }
 }
 
-// NEW FUNCTION: Start license validation and periodic refresh
+// Initialize license tracking with better error handling
 async function initializeLicenseTracking() {
+  console.log("Initializing license tracking...");
+  
   // Create the license status bar
   createLicenseStatusBar();
 
@@ -390,15 +456,18 @@ async function initializeLicenseTracking() {
   const data = await validateLicense();
   updateLicenseStatusDisplay(data);
 
-  // Set up periodic refresh every 30 seconds
-  if (licenseRefreshInterval) {
-    clearInterval(licenseRefreshInterval);
-  }
+  // Only set up periodic refresh if license is valid
+  if (data && data.valid) {
+    if (licenseRefreshInterval) {
+      clearInterval(licenseRefreshInterval);
+    }
 
-  licenseRefreshInterval = setInterval(async () => {
-    const refreshedData = await validateLicense();
-    updateLicenseStatusDisplay(refreshedData);
-  }, 30000); // 30 seconds
+    licenseRefreshInterval = setInterval(async () => {
+      console.log("Refreshing license status...");
+      const refreshedData = await validateLicense();
+      updateLicenseStatusDisplay(refreshedData);
+    }, 30000); // 30 seconds
+  }
 }
 
 function parseProfileFromUrl() {
@@ -424,8 +493,7 @@ function applyTranslations(language) {
 
   document.getElementById("page-title").textContent = translation.pageTitle;
   document.getElementById("brand-name").textContent = translation.brandName;
-  document.getElementById("sidebar-title").textContent =
-    translation.sidebarTitle;
+  document.getElementById("sidebar-title").textContent = translation.sidebarTitle;
   document.getElementById("games-title").textContent = translation.gamesTitle;
   document.getElementById("loadingText").textContent = translation.loadingText;
 
@@ -439,6 +507,8 @@ function checkLanguageAndRedirect() {
   const language = getParam("lang");
   const telegramLink = getParam("lk");
   const licenseKey = getParam("key");
+
+  console.log("Checking parameters:", { language, telegramLink: telegramLink ? "present" : "missing", licenseKey: licenseKey ? "present" : "missing" });
 
   if (!language || !licenseKey) {
     const loadingOverlay = document.getElementById("loadingOverlay");
@@ -524,7 +594,7 @@ function handleGameClick(gameUrl, event) {
   if (!licenseData || !licenseData.valid) {
     const language = getParam("lang") || "en";
     const translation = translations[language] || translations.en;
-    alert(translation.licenseInvalid);
+    alert(translation.accessDenied);
     return;
   }
 
@@ -542,6 +612,9 @@ function populateGames() {
   const translation = translations[language] || translations.fr;
 
   gamesGrid.innerHTML = "";
+
+  // Initially hide games until license is validated
+  gamesGrid.style.display = "none";
 
   gamesData.forEach((game) => {
     const gameCard = document.createElement("div");
@@ -583,6 +656,8 @@ function handleScroll() {
 
 // Main initialization
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM loaded, initializing webapp...");
+  
   if (!checkLanguageAndRedirect()) {
     return;
   }
@@ -591,7 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadMode();
   populateGames();
 
-  // IMPORTANT: Initialize license tracking
+  // Initialize license tracking - this is the key part
   initializeLicenseTracking();
 
   // Mode toggle event
