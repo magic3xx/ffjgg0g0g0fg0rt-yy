@@ -13,7 +13,6 @@
         padding: 0;
         box-sizing: border-box;
     }
-
     body {
         font-family: 'Inter', sans-serif;
         overflow-x: hidden;
@@ -22,12 +21,10 @@
         color: #e6e6e6;
         min-height: 100vh;
     }
-
     body.light-mode {
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
         color: #1e293b;
     }
-
     .top-nav {
         display: flex;
         justify-content: space-between;
@@ -42,10 +39,74 @@
         z-index: 1000;
         transition: all 0.3s ease;
     }
-
     body.light-mode .top-nav {
         background: rgba(255, 255, 255, 0.9);
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    /* License Status Bar Styles */
+    .license-status-bar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 81px; /* Below the top nav */
+        width: 100%;
+        z-index: 999;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .license-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .license-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .license-status {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .license-time {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    
+    .license-warning {
+        background: rgba(255, 193, 7, 0.2);
+        border: 1px solid rgba(255, 193, 7, 0.5);
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 14px;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .license-status.valid {
+        color: #28a745;
+    }
+    
+    .license-status.expired {
+        color: #dc3545;
+    }
+    
+    .license-status.invalid {
+        color: #ffc107;
     }
 
     .brand-section {
@@ -53,7 +114,6 @@
         align-items: center;
         gap: 15px;
     }
-
     .brand-logo {
         width: 40px;
         height: 40px;
@@ -67,7 +127,6 @@
         font-weight: 700;
         box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
     }
-
     .brand-name {
         font-size: 24px;
         font-weight: 700;
@@ -77,13 +136,11 @@
         background-clip: text;
         text-shadow: 0 2px 4px rgba(255, 140, 0, 0.2);
     }
-
     .profile-section {
         display: flex;
         align-items: center;
         gap: 5px;
     }
-
     .profile-btn {
         display: flex;
         align-items: center;
@@ -96,18 +153,15 @@
         transition: all 0.3s ease;
         border: 1px solid rgba(255, 140, 0, 0.2);
     }
-
     body.light-mode .profile-btn {
         background: rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(0, 0, 0, 0.1);
     }
-
     .profile-btn:hover {
         background: rgba(255, 140, 0, 0.2);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(255, 140, 0, 0.2);
     }
-
     .profile-avatar {
         width: 32px;
         height: 32px;
@@ -119,22 +173,18 @@
         font-size: 14px;
         box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
     }
-
     .profile-info {
         display: flex;
         flex-direction: column;
     }
-
     .profile-name {
         font-size: 14px;
         font-weight: 600;
     }
-
     .profile-id {
         font-size: 11px;
         opacity: 0.7;
     }
-
     .hamburger-menu {
         background: rgba(255, 140, 0, 0.1);
         border: 1px solid rgba(255, 140, 0, 0.2);
@@ -143,18 +193,15 @@
         padding: 12px;
         transition: all 0.3s ease;
     }
-
     body.light-mode .hamburger-menu {
         background: rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(0, 0, 0, 0.1);
     }
-
     .hamburger-menu:hover {
         background: rgba(255, 140, 0, 0.2);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(255, 140, 0, 0.2);
     }
-
     .hamburger-line {
         width: 20px;
         height: 2px;
@@ -163,12 +210,10 @@
         transition: all 0.3s ease;
         border-radius: 2px;
     }
-
     .container {
         padding: 40px;
-        margin-top: 100px;
+        margin-top: 140px; /* Increased to accommodate license bar */
     }
-
     .section-title {
         font-size: 32px;
         font-weight: 700;
@@ -182,7 +227,6 @@
         position: relative;
         padding-bottom: 15px;
     }
-
     .section-title::after {
         content: '';
         position: absolute;
@@ -194,14 +238,12 @@
         background: linear-gradient(to right, transparent, #ff8c00, transparent);
         border-radius: 2px;
     }
-
     .games-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 30px;
         padding: 20px 0;
     }
-
     .game-card {
         position: relative;
         cursor: pointer;
@@ -214,18 +256,15 @@
         height: 300px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
-
     body.light-mode .game-card {
         background: rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(0, 0, 0, 0.1);
     }
-
     .game-card:hover {
         transform: translateY(-10px) scale(1.02);
         box-shadow: 0 20px 40px rgba(255, 140, 0, 0.3);
         border-color: rgba(255, 140, 0, 0.4);
     }
-
     .game-image {
         width: 100%;
         height: 200px;
@@ -234,7 +273,6 @@
         position: relative;
         border-radius: 16px 16px 0 0;
     }
-
     .game-overlay {
         position: absolute;
         top: 0;
@@ -249,11 +287,9 @@
         transition: all 0.3s ease;
         border-radius: 16px 16px 0 0;
     }
-
     .game-card:hover .game-overlay {
         opacity: 1;
     }
-
     .play-btn {
         color: #ffffff;
         font-size: 32px;
@@ -268,13 +304,11 @@
         transition: all 0.3s ease;
         border: 1px solid rgba(255, 255, 255, 0.3);
     }
-
     .play-btn:hover {
         transform: scale(1.1);
         background: rgba(255, 255, 255, 0.3);
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
     }
-
     .game-info {
         padding: 20px;
         text-align: center;
@@ -283,14 +317,12 @@
         flex-direction: column;
         justify-content: center;
     }
-
     .game-name {
         font-size: 18px;
         font-weight: 600;
         margin-bottom: 8px;
         color: #fff;
     }
-
     .game-category {
         font-size: 12px;
         opacity: 0.9;
@@ -303,7 +335,6 @@
         color: #ff8c00;
         border: 1px solid rgba(255, 140, 0, 0.3);
     }
-
     .sidebar {
         position: fixed;
         top: 0;
@@ -317,16 +348,13 @@
         border-left: 1px solid rgba(255, 140, 0, 0.2);
         box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
     }
-
     body.light-mode .sidebar {
         background: rgba(255, 255, 255, 0.95);
         border-left: 1px solid rgba(0, 0, 0, 0.1);
     }
-
     .sidebar.active {
         right: 0;
     }
-
     .sidebar-header {
         display: flex;
         justify-content: space-between;
@@ -334,11 +362,9 @@
         padding: 30px;
         border-bottom: 1px solid rgba(255, 140, 0, 0.2);
     }
-
     body.light-mode .sidebar-header {
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
-
     .sidebar-title {
         font-size: 24px;
         font-weight: 700;
@@ -347,7 +373,6 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-
     .close-sidebar {
         background: rgba(255, 140, 0, 0.1);
         border: 1px solid rgba(255, 140, 0, 0.2);
@@ -358,27 +383,22 @@
         padding: 12px;
         transition: all 0.3s ease;
     }
-
     body.light-mode .close-sidebar {
         background: rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(0, 0, 0, 0.1);
     }
-
     .close-sidebar:hover {
         background: rgba(255, 140, 0, 0.2);
         transform: scale(1.1);
         box-shadow: 0 4px 12px rgba(255, 140, 0, 0.2);
     }
-
     .sidebar-menu {
         list-style: none;
         padding: 30px;
     }
-
     .sidebar-menu li {
         margin: 20px 0;
     }
-
     .sidebar-menu a {
         color: inherit;
         text-decoration: none;
@@ -391,17 +411,14 @@
         font-weight: 500;
         border: 1px solid transparent;
     }
-
     .sidebar-menu a:hover {
         background: rgba(255, 140, 0, 0.1);
         transform: translateX(5px);
         border-color: rgba(255, 140, 0, 0.2);
     }
-
     .sidebar-menu a i {
         color: #ff8c00;
     }
-
     .overlay {
         position: fixed;
         top: 0;
@@ -415,12 +432,10 @@
         z-index: 1000;
         backdrop-filter: blur(5px);
     }
-
     .overlay.active {
         opacity: 1;
         pointer-events: auto;
     }
-
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -438,16 +453,13 @@
         transition: opacity 0.3s ease;
         z-index: 1002;
     }
-
     body.light-mode .loading-overlay {
         background: rgba(255, 255, 255, 0.9);
     }
-
     .loading-overlay.active {
         opacity: 1;
         pointer-events: auto;
     }
-
     .loading-spinner {
         width: 60px;
         height: 60px;
@@ -456,7 +468,6 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
-
     .loading-text {
         margin-top: 20px;
         font-size: 18px;
@@ -465,12 +476,10 @@
         max-width: 80%;
         color: #ff8c00;
     }
-
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-
     .back-to-top {
         position: fixed;
         bottom: 30px;
@@ -489,34 +498,28 @@
         box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
-
     .back-to-top.active {
         display: flex;
     }
-
     .back-to-top:hover {
         transform: translateY(-5px) scale(1.1);
         box-shadow: 0 15px 40px rgba(255, 140, 0, 0.4);
     }
-
     @media (max-width: 768px) {
         .top-nav {
             padding: 15px 20px;
         }
-
         .brand-name {
             font-size: 20px;
         }
-
         .container {
             padding: 20px;
+            margin-top: 140px; /* Account for license bar on mobile */
         }
-
         .games-grid {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
-
         .sidebar {
             width: 100%;
             right: -100%;
@@ -525,31 +528,45 @@
                 max-width: 50vw;
                 max-height: 50vw;
             }
+            
+        /* License bar mobile adjustments */
+        .license-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .license-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            width: 100%;
+        }
+        
+        .license-status-bar {
+            top: 61px;
+            padding: 8px 15px;
+        }
     }
-
      @media (max-width: 412px) {
          .top-nav {
             padding: 15px 2px;
         }
-
         .brand-name {
             font-size: 20px;
         }
-
         .container {
             padding: 10px;
+            margin-top: 130px; /* Adjusted for mobile with license bar */
         }
-
         .games-grid {
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
         }
-
         .sidebar {
             width: 100%;
             right: -100%;
         }
-
         .profile-btn {
             padding: 8px 12px;
         }
@@ -560,38 +577,31 @@
         .profile-info {
             display: none;
         }
-
         .hamburger-menu {
             padding: 8px;
         }
-
         .hamburger-line {
             width: 18px;
             height: 2px;
         }
-
         .game-card {
             height: 250px;
         }
-
         .game-image {
             height: 150px;
         }
         .game-info {
             height: 80px;
         }
-
         .play-btn {
             width: 60px;
             height: 60px;
             font-size: 24px;
         }
-
         .loading-spinner {
             width: 40px;
             height: 40px;
         }
-
         .loading-text {
             font-size: 14px;
             max-width: 90%;
@@ -600,16 +610,13 @@
             width: 50px;
             height: 50px;
         }
-
         .back-to-top i {
             font-size: 24px;
         }
-
         .sidebar {
             width: 100%;
             right: -100%;
         }
-
         .sidebar-header {
             padding: 20px;
         }
@@ -627,7 +634,6 @@
         .sidebar-menu a i {
             font-size: 16px;
         }
-
         .sidebar-menu li {
             margin: 15px 0;
         }
@@ -637,23 +643,34 @@
         .sidebar.active {
             right: 0;
         }
-
         .overlay {
             backdrop-filter: blur(5px);
         }
-
         .overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
-
         .loading-overlay {
             padding: 20px;
         }
-
         .sidebar {
             max-width: 350px;
         }
+        
+        /* License status bar mobile specific */
+        .license-status-bar {
+            padding: 8px 15px;
+            top: 61px; /* Adjusted for smaller mobile nav */
+        }
+        
+        .license-status {
+            font-size: 12px;
+        }
+        
+        .license-time {
+            font-size: 11px;
+        }
+        
         @media (max-width: 412px) {
             .sidebar {
                 max-width: 50vw;
@@ -662,10 +679,10 @@
         }
      }
 </style>
-
 </head>
 <body class="dark-mode">
-    <div class="top-nav">
+    <!-- Top Navigation -->
+    <header class="top-nav">
         <div class="brand-section">
             <div class="brand-logo">F</div>
             <div class="brand-name" id="brand-name">FOXBET</div>
@@ -686,15 +703,20 @@
                 <div class="hamburger-line"></div>
             </button>
         </div>
-    </div>
-
+    </header>
+    
+    <!-- License Status Bar - Will be created dynamically by JavaScript -->
+    
+    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <div class="loading-text" id="loadingText">Chargement de votre jeu...</div>
     </div>
-
+    
+    <!-- Overlay for sidebar -->
     <div class="overlay" id="overlay"></div>
-
+    
+    <!-- Sidebar Menu -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3 class="sidebar-title" id="sidebar-title">Menu</h3>
@@ -706,26 +728,23 @@
             <li><a href="#" id="modeToggle" aria-label="Changer le mode"><i class="fas fa-moon"></i> <span id="modeText">Mode Sombre</span></a></li>
         </ul>
     </div>
-
+    
+    <!-- Back to Top Button -->
     <div class="back-to-top" id="backToTop">
         <i class="fas fa-arrow-up"></i>
     </div>
-
+    
+    <!-- Main Content -->
     <main class="container">
         <h2 class="section-title" id="games-title">Nos Jeux</h2>
         <section>
             <div id="gamesGrid" class="games-grid">
+                <!-- Games will be populated by JavaScript -->
             </div>
         </section>
     </main>
-
+    
+    <!-- Include the updated JavaScript file -->
     <script src="home/js2424.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
