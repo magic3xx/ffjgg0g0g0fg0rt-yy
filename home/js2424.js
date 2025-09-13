@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const lang = getParam("lang") || 'en', t = translations[lang] || translations.en;
         errorMessage.textContent = t.licenseValidating; errorMessage.style.color = 'inherit'; licenseKeyInput.style.borderColor = '';
         try {
-            const url = `https://license-key-manageme-yugi.bolt.host/api/validate-key?key=${key}`;
+            const url = `https://dntumiuptmsqynwgvvwa.supabase.co/functions/v1/validate-key?key=${key}`;
             const response = await fetch(url, { method: 'GET' });
             const data = await response.json();
             if (response.ok && data.valid && data.durationMs) {
