@@ -439,6 +439,46 @@
         transform: translateY(-5px) scale(1.1);
         box-shadow: 0 15px 40px rgba(255, 140, 0, 0.4);
     }
+    /* --- NEW STYLES FOR LICENSE timer --- */
+    .license-timer {
+        background: rgba(255, 140, 0, 0.1);
+        border: 1px solid rgba(255, 140, 0, 0.2);
+        color: #ff8c00;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    
+    body.light-mode .license-timer {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #cc5500;
+    }
+    
+    /* For mobile devices */
+    @media (max-width: 768px) {
+        .license-timer {
+            position: fixed;
+            top: 85px; /* Position it below the main nav bar */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            font-size: 12px;
+            padding: 6px 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+    }
+    
+    @media (max-width: 412px) {
+        .license-timer {
+            top: 75px; /* Adjust for smaller nav bar */
+        }
+    }
+    
 
     /* --- NEW STYLES FOR LICENSE SYSTEM --- */
     .license-overlay {
@@ -709,6 +749,9 @@
             <div class="brand-logo">F</div>
             <div class="brand-name" id="brand-name">FOXBET</div>
         </div>
+        
+        <div class="license-timer" id="licenseTimer" style="display: none;"></div>
+        
         <div class="profile-section">
             <a class="profile-btn" id="profileBtn" href="#" aria-label="Profil utilisateur">
                 <div class="profile-avatar">
@@ -768,3 +811,4 @@
     <script src="home/js2424.js"></script>
 </body>
 </html>
+
