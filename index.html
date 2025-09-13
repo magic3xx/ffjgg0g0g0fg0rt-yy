@@ -43,10 +43,6 @@
         background: rgba(255, 255, 255, 0.9);
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
-    
-
-
-
     .brand-section {
         display: flex;
         align-items: center;
@@ -443,6 +439,113 @@
         transform: translateY(-5px) scale(1.1);
         box-shadow: 0 15px 40px rgba(255, 140, 0, 0.4);
     }
+
+    /* --- NEW STYLES FOR LICENSE SYSTEM --- */
+    .license-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(12, 12, 20, 0.95);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+    }
+    body.light-mode .license-overlay {
+        background: rgba(248, 250, 252, 0.95);
+    }
+    .license-box {
+        background: rgba(20, 20, 25, 0.8);
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        width: 90%;
+        max-width: 450px;
+        border: 1px solid rgba(255, 140, 0, 0.2);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        transform: scale(0.95);
+        opacity: 0;
+        animation: fadeInScale 0.5s forwards;
+    }
+    body.light-mode .license-box {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    @keyframes fadeInScale {
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    .license-box h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff8c00 0%, #cc5500 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .license-box p {
+        font-size: 16px;
+        margin-bottom: 30px;
+        opacity: 0.8;
+    }
+    .license-box input {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 140, 0, 0.3);
+        background: rgba(0, 0, 0, 0.2);
+        color: #e6e6e6;
+        font-size: 16px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    body.light-mode .license-box input {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.2);
+        color: #1e293b;
+    }
+    .license-box input:focus {
+        outline: none;
+        border-color: #ff8c00;
+        box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+    }
+    .license-box button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #ff8c00 0%, #cc5500 100%);
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 140, 0, 0.3);
+    }
+    .license-box button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 140, 0, 0.4);
+    }
+    .error-message {
+        color: #ff4d4d !important;
+        font-size: 14px !important;
+        margin-top: 15px;
+        height: 20px;
+        opacity: 1 !important;
+    }
+    /* Hide the main content until unlocked */
+    .content-locked > *:not(.license-overlay) {
+        display: none !important;
+    }
+    /* --- END OF NEW STYLES --- */
+
     @media (max-width: 768px) {
         .top-nav {
             padding: 15px 20px;
@@ -466,8 +569,6 @@
                 max-width: 50vw;
                 max-height: 50vw;
             }
-            
-       
     }
      @media (max-width: 412px) {
          .top-nav {
@@ -577,9 +678,6 @@
         .sidebar {
             max-width: 350px;
         }
-        
-        
-        
         @media (max-width: 412px) {
             .sidebar {
                 max-width: 50vw;
@@ -590,6 +688,21 @@
 </style>
 </head>
 <body class="dark-mode">
+
+    <!-- NEW: License Overlay -->
+    <div class="license-overlay" id="licenseOverlay">
+        <div class="license-box">
+            <div class="brand-logo" style="margin: 0 auto 20px auto;">L</div>
+            <h2>Activation Required</h2>
+            <p>Please enter your license key to unlock the content.</p>
+            <form id="licenseForm">
+                <input type="text" id="licenseKey" placeholder="Enter your license key" required>
+                <button type="submit">Activate</button>
+            </form>
+            <p class="error-message" id="errorMessage"></p>
+        </div>
+    </div>
+    
     <!-- Top Navigation -->
     <header class="top-nav">
         <div class="brand-section">
@@ -613,9 +726,7 @@
             </button>
         </div>
     </header>
-    
-    
-    
+        
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
@@ -657,5 +768,3 @@
     <script src="home/js2424.js"></script>
 </body>
 </html>
-
-
