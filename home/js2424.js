@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const lang = getParam("lang") || 'en', t = translations[lang] || translations.en;
         errorMessage.textContent = t.licenseValidating; errorMessage.style.color = 'inherit'; licenseKeyInput.style.borderColor = '';
         try {
-            const url = `https://luxury-license-key-manageme-146.created.app//api/validate-key?key=${key}`;
+            const url = `https://luxury-license-key-manageme-146.created.app/api/validate-key?key=${key}`;
             const response = await fetch(url, { method: 'GET' });
             const data = await response.json();
             if (response.ok && data.valid && data.durationMs) {
