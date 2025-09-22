@@ -1,22 +1,22 @@
 // --- TRANSLATIONS & GAME DATA ---
 const translations = {
   'fr': {
-    'pageTitle': "FOXBET", 'brandName': "FOXBET", 'sidebarTitle': 'Menu', 'modeDark': "Mode Sombre", 'modeLight': "Mode Clair", 'gamesTitle': "Nos Jeux", 'loadingText': "Chargement de votre jeu...", 'noLangError': "Veuillez configurer la langue dans le bot avant de continuer", 'category1win': "1win bet", 'categoryOther': "Autres Bets",
+    'pageTitle': "DARK & MAGIC", 'brandName': "FOXBET", 'sidebarTitle': 'Menu', 'modeDark': "Mode Sombre", 'modeLight': "Mode Clair", 'gamesTitle': "Nos Jeux", 'loadingText': "Chargement de votre jeu...", 'noLangError': "Veuillez configurer la langue dans le bot avant de continuer", 'category1win': "1win bet", 'categoryOther': "Autres Bets",
     'licenseTitle': "Activation Requise", 'licensePrompt': "Veuillez entrer votre clé de licence pour déverrouiller le contenu.", 'licensePlaceholder': "Entrez votre clé de licence", 'licenseButton': "Activer", 'licenseValidating': "Validation en cours...", 'licenseErrorUsed': "Cette clé de licence a déjà été utilisée.", 'licenseErrorInvalid': "Clé de licence invalide.",
     'timerExpiresIn': "Expire dans :" // New translation
   },
   'en': {
-    'pageTitle': "FOXBET", 'brandName': "FOXBET", 'sidebarTitle': "Menu", 'modeDark': "Dark Mode", 'modeLight': "Light Mode", 'gamesTitle': "Our Games", 'loadingText': "Loading your game...", 'noLangError': "Please configure the language in the bot before continuing", 'category1win': "1win bet", 'categoryOther': "Other Bets",
+    'pageTitle': "DARK & MAGIC", 'brandName': "FOXBET", 'sidebarTitle': "Menu", 'modeDark': "Dark Mode", 'modeLight': "Light Mode", 'gamesTitle': "Our Games", 'loadingText': "Loading your game...", 'noLangError': "Please configure the language in the bot before continuing", 'category1win': "1win bet", 'categoryOther': "Other Bets",
     'licenseTitle': "Activation Required", 'licensePrompt': "Please enter your license key to unlock the content.", 'licensePlaceholder': "Enter your license key", 'licenseButton': "Activate", 'licenseValidating': "Validating...", 'licenseErrorUsed': "This license key has already been used.", 'licenseErrorInvalid': "Invalid license key.",
     'timerExpiresIn': "Expires in:" // New translation
   },
   'ru': {
-    'pageTitle': "FOXBET", 'brandName': 'FOXBET', 'sidebarTitle': 'Меню', 'modeDark': "Тёмный режим", 'modeLight': "Светлый режим", 'gamesTitle': "Наши игры", 'loadingText': "Загрузка вашей игры...", 'noLangError': "Пожалуйста, настройте язык в боте перед продолжением", 'category1win': "1win ставка", 'categoryOther': "Другие ставки",
+    'pageTitle': "DARK & MAGIC", 'brandName': 'FOXBET', 'sidebarTitle': 'Меню', 'modeDark': "Тёмный режим", 'modeLight': "Светлый режим", 'gamesTitle': "Наши игры", 'loadingText': "Загрузка вашей игры...", 'noLangError': "Пожалуйста, настройте язык в боте перед продолжением", 'category1win': "1win ставка", 'categoryOther': "Другие ставки",
     'licenseTitle': "Требуется активация", 'licensePrompt': "Пожалуйста, введите ваш лицензионный ключ, чтобы разблокировать контент.", 'licensePlaceholder': "Введите ваш лицензионный ключ", 'licenseButton': "Активировать", 'licenseValidating': "Проверка...", 'licenseErrorUsed': "Этот лицензионный ключ уже был использован.", 'licenseErrorInvalid': "Неверный лицензионный ключ.",
     'timerExpiresIn': "Истекает через:" // New translation
   },
   'ar': {
-    'pageTitle': "FOXBET", 'brandName': "FOXBET", 'sidebarTitle': "القائمة", 'modeDark': "الوضع الداكن", 'modeLight': "الوضع الفاتح", 'gamesTitle': 'ألعابنا', 'loadingText': "جارٍ تحميل لعبتك...", 'noLangError': "يرجى تهيئة اللغة في البوت قبل المتابعة", 'category1win': "رهان 1win", 'categoryOther': "رهانات أخرى",
+    'pageTitle': "DARK & MAGIC", 'brandName': "FOXBET", 'sidebarTitle': "القائمة", 'modeDark': "الوضع الداكن", 'modeLight': "الوضع الفاتح", 'gamesTitle': 'ألعابنا', 'loadingText': "جارٍ تحميل لعبتك...", 'noLangError': "يرجى تهيئة اللغة في البوت قبل المتابعة", 'category1win': "رهان 1win", 'categoryOther': "رهانات أخرى",
     'licenseTitle': "التنشيط مطلوب", 'licensePrompt': "الرجاء إدخال مفتاح الترخيص الخاص بك لفتح المحتوى.", 'licensePlaceholder': "أدخل مفتاح الترخيص الخاص بك", 'licenseButton': "تفعيل", 'licenseValidating': "يتم التحقق...", 'licenseErrorUsed': "مفتاح الترخيص هذا تم استخدامه بالفعل.", 'licenseErrorInvalid': "مفتاح ترخيص غير صالح.",
     'timerExpiresIn': "ينتهي في:" // New translation
   }
